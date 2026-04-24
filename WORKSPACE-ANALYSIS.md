@@ -29,14 +29,15 @@
    - [x] `idea` (33-insights → 43-ideas 경로 조정, wiki 승격 판단 추가)
    - [x] `weekly-synthesis` (경미한 범용화, Mac/Linux 호환성)
 
-2. **확장 skills (워크숍에서 쓰이는 것)**
-   - `csv-clean`
-   - `excel-to-csv`
-   - `dashboard-prd`
-   - `webapp-prd`
-   - `transcript-organizer`
-   - `pdf-to-md`
-   - `wiki-ingest`, `wiki-lint` (Wiki 시스템 운영용)
+2. **확장 skills (워크숍에서 쓰이는 것)** ✅ 완료 (2026-04-24)
+   - [x] `csv-clean` (Python 스크립트 포함, 상대 경로 변경)
+   - [x] `excel-to-csv` (Python 스크립트 포함, 상대 경로 변경)
+   - [x] `dashboard-prd` (references/ 포함, pkm 경로 → 상대 경로)
+   - [x] `webapp-prd` (references/ 포함, scope-project 의존성 제거)
+   - [x] `transcript-organizer` (templates/ + utils/ 포함, pkm/00-inbox → ./00-inbox)
+   - [x] `pdf-to-md` (work-journal 하드코딩 제거, 범용 저장 경로)
+   - [x] `wiki-ingest` (pkm/30-knowledge/00-wiki → ./30-knowledge/00-wiki)
+   - [x] `wiki-lint` (동일 경로 조정)
 
 3. **Agents 포팅 (범용만)**
    - `research-worker`
