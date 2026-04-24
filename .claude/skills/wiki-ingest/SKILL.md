@@ -11,6 +11,7 @@ allowed-tools:
   - Grep
   - Glob
   - Bash
+  - WebFetch
   - AskUserQuestion
 ---
 

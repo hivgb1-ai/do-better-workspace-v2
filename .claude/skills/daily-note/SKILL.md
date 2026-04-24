@@ -1,6 +1,6 @@
 ---
 name: daily-note
-description: 오늘 날짜의 Daily Note 생성 또는 열기. gcalcli 설치 시 Google Calendar 일정 포함. "오늘 daily note", "일일 노트", "daily note", "오늘 작성", "하루 기록" 등을 언급하면 자동 실행.
+description: 오늘 날짜의 Daily Note 생성 또는 열기. gws (Google Workspace CLI) 인증 시 Google Calendar 오늘 일정 포함. "오늘 daily note", "일일 노트", "daily note", "오늘 작성", "하루 기록" 등을 언급하면 자동 실행.
 allowed-tools:
   - Read
   - Write
@@ -52,18 +52,38 @@ esac
 - `YYYY-MM-DD` → `{TODAY}`
 - `(요일)` → `{WEEKDAY}`
 
-### 5. (선택) Google Calendar 일정 추가
+### 5. (선택) Google Calendar 오늘 일정 추가
 
-`gcalcli`가 설치된 경우에만:
+**도구**: `gws` (Google Workspace CLI). 설치/인증은 교육 과정에서 `gws auth login`으로 1회 세팅.
+JSON 파싱은 Python3 내장 `json` 모듈 사용 (별도 설치 불필요).
 
 ```bash
-if command -v gcalcli &> /dev/null; then
-  EVENTS=$(gcalcli agenda --tsv 2>/dev/null | head -20)
+if command -v gws &> /dev/null; then
+  # 인증 안 되어 있으면 error 객체 반환 → Python에서 조용히 스킵
+  EVENTS_JSON=$(gws calendar +agenda --today --format json 2>/dev/null)
+
+  EVENTS_MD=$(echo "$EVENTS_JSON" | python3 - <<'PYEOF' 2>/dev/null
+import json, sys
+try:
+    data = json.load(sys.stdin)
+    for ev in data.get("items", []):
+        start = ev.get("start", {})
+        dt = start.get("dateTime") or start.get("date", "")
+        # dateTime("2026-04-24T10:00:00+09:00") → "10:00"
+        # date("2026-04-24", 종일 일정) → "종일"
+        time_str = dt[11:16] if "T" in dt else "종일"
+        summary = ev.get("summary", "(제목 없음)")
+        print(f"- **{time_str}** {summary}")
+except Exception:
+    pass  # 인증 실패/error 응답 구조 → 조용히 스킵
+PYEOF
+)
 fi
 ```
 
-결과를 Markdown 리스트로 변환하여 daily note에 "오늘 일정" 섹션 추가.
-설치 안 되어 있으면 이 단계 스킵 (에러 메시지 X).
+- `EVENTS_MD`를 daily note의 "오늘 일정" 섹션(템플릿에 없으면 상단에 신설)에 삽입
+- `gws` 미설치 / 인증 실패 / Python3 미설치 → 단계 전체 스킵 (에러 메시지 X)
+- 참고: `gws calendar +agenda --today`는 오늘 일정만 반환하는 read-only 헬퍼
 
 ### 6. 결과 보고
 

@@ -130,8 +130,8 @@ tags: [weekly]
 
 분석 후 사용자에게 제안:
 - 완료된 프로젝트가 있으면 → "90-archive로 이동할까요?"
-- Inbox 항목 많으면 → "inbox 정리 스킬 호출할까요?"
-- 00-wiki에 승격할 인사이트가 있으면 → "wiki에 저장할까요?"
+- Inbox 항목 많으면 → "00-inbox 폴더를 지금 함께 정리할까요?" (해당 폴더를 직접 훑어서 10-projects / 30-knowledge / 43-ideas / 90-archive로 재배치)
+- 00-wiki에 승격할 인사이트가 있으면 → "wiki-ingest로 저장할까요?"
 
 ## 원칙
 
