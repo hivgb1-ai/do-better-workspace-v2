@@ -27,6 +27,9 @@ cd do-better-workspace
 ### 2. Claude Code에서 열기
 VS Code 또는 터미널에서 Claude Code 실행.
 
+> **줄바꿈 키 설정 (clone 후 1회)**: 프롬프트에서 `Shift+Enter`로 줄바꿈하려면 Claude Code에 `/terminal-setup`을 한 번 입력하세요. VS Code 터미널·iTerm2·Apple Terminal에 맞춰 자동 설정됩니다.
+> 이 설정은 **레포가 아니라 사용자의 터미널/VS Code 환경에 저장**되므로 clone에 포함되지 않습니다 — clone한 분은 각자 한 번 실행해야 합니다.
+
 ### 3. 초기 설정
 
 Claude에게:

@@ -190,6 +190,20 @@ fi
 
 설치까지 자동으로 하지 않음. 사용자가 필요성 판단 후 진행.
 
+### 5.5 터미널 줄바꿈 키 (Shift+Enter) 안내
+
+프롬프트에서 `Shift+Enter`로 줄바꿈하려면 Claude Code의 `/terminal-setup`을 **사용자가 직접 1회 실행**해야 한다. 이 설정은 VS Code/터미널 같은 **사용자 환경**에 저장되므로 레포(clone)에는 포함되지 않는다 — 교육용 clone마다 각자 한 번 실행 필요.
+
+```bash
+if [ "$TERM_PROGRAM" = "vscode" ]; then
+  echo "ℹ️  VS Code 터미널 감지됨."
+fi
+echo "줄바꿈(Shift+Enter)을 쓰려면 Claude Code 프롬프트에 입력: /terminal-setup"
+echo "  (VS Code 터미널·iTerm2·Apple Terminal 자동 설정. 레포가 아니라 사용자 환경에 저장되어 clone엔 안 따라옴)"
+```
+
+자동 설치·실행은 하지 않는다 — `/terminal-setup`은 Claude Code 클라이언트 명령이라 사용자가 프롬프트에 직접 입력해야 한다. (재실행해도 안전)
+
 ### 6. 첫 Daily Note 생성 제안
 
 "오늘의 첫 Daily Note를 만들까요? (Y/n)"
