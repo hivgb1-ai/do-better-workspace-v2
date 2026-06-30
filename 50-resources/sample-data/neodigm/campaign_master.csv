@@ -1,6 +1,0 @@
-﻿advertiser_id,advertiser,industry,objective,monthly_budget_krw,agency_fee_rate,mql_to_sql_rate,target_mql,primary_channel,base_cpc_krw
-ADV-ADOBE,Adobe Creative Cloud B2B,Software,Lead Gen,48000000,0.18,0.24,2230,구글_검색,920
-ADV-AWS,AWS Korea Summit 리드젠,Cloud,Lead Gen,62000000,0.17,0.22,2072,링크드인_ABM,1080
-ADV-MS,Microsoft 365 ABM,Software,ABM,36000000,0.2,0.3,1317,링크드인_ABM,1350
-ADV-HP,HP Workstation 인지,Hardware,Awareness,28000000,0.19,0.15,914,네이버_GFA,640
-ADV-CISCO,Cisco Networking 세미나,Network,Lead Gen,31000000,0.18,0.2,870,구글_검색,1150
