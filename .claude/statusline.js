@@ -26,9 +26,13 @@ function readStdin() {
   return Buffer.concat(chunks).toString("utf8");
 }
 
+function stripBom(s) {
+  return s.charCodeAt(0) === 0xfeff ? s.slice(1) : s;
+}
+
 let input = {};
 try {
-  input = JSON.parse(readStdin());
+  input = JSON.parse(stripBom(readStdin()));
 } catch (e) {
   input = {};
 }
