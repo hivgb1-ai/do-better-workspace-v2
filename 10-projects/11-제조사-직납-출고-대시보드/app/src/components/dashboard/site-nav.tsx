@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 const NAV_ITEMS = [
   { href: "/", label: "이번 달 개요" },
   { href: "/history", label: "기간별 히스토리 조회" },
+  { href: "/monthly-report", label: "월말 보고" },
 ];
 
 export function SiteNav() {
