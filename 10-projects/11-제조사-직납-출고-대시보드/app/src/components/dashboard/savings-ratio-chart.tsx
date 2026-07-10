@@ -70,7 +70,7 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, target }: Sav
           strokeDasharray="4 4"
           label={{ value: `목표 ${target}%`, position: "insideTopRight", fontSize: 11, fill: "var(--critical)" }}
         />
-        <Bar yAxisId="savings" dataKey="savings" name="절감액" fill="var(--chart-2)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+        <Bar yAxisId="savings" dataKey="savings" name="절감액" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
         {/* isAnimationActive=false: react-smooth never resolves under React 19,
             leaving the path stuck at its hidden (stroke-dashoffset) starting state */}
         <Line
@@ -78,9 +78,9 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, target }: Sav
           type="monotone"
           dataKey="ratio"
           name="절감비율"
-          stroke="var(--chart-1)"
+          stroke="var(--chart-4)"
           strokeWidth={2}
-          dot={{ r: 4, fill: "var(--chart-1)" }}
+          dot={{ r: 4, fill: "var(--chart-4)", stroke: "var(--card)", strokeWidth: 1.5 }}
           isAnimationActive={false}
         />
       </ComposedChart>

@@ -64,8 +64,8 @@ export function MilkrunChannelChart({ months, revenue, milkrunCost, ratio }: Mil
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Bar yAxisId="amount" dataKey="revenue" name="총매출" fill="var(--chart-1)" isAnimationActive={false} />
-        <Bar yAxisId="amount" dataKey="milkrunCost" name="밀크런" fill="var(--chart-3)" isAnimationActive={false} />
+        <Bar yAxisId="amount" dataKey="revenue" name="총매출" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
+        <Bar yAxisId="amount" dataKey="milkrunCost" name="밀크런" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
         <Line
           yAxisId="ratio"
           type="monotone"

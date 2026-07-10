@@ -38,8 +38,8 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Bar dataKey="direct" name="직납 절감액" stackId="total" fill="var(--chart-1)" isAnimationActive={false} />
-        <Bar dataKey="milkrun" name="밀크런 절감액" stackId="total" fill="var(--chart-3)" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+        <Bar dataKey="direct" name="직납 절감액" stackId="total" fill="var(--chart-1)" maxBarSize={24} isAnimationActive={false} />
+        <Bar dataKey="milkrun" name="밀크런 절감액" stackId="total" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false}>
           {/* 스택 맨 위(밀크런) 막대에 얹어 합계(TTL) 라벨로 표시 */}
           <LabelList
             dataKey="totalLabel"
