@@ -12,10 +12,11 @@ export interface PeriodSearchParams {
   to?: string; // YYYY-MM
 }
 
-// months: 차트에 보여줄 개월 수 / headlineMonths: 상단 요약을 집계할 개월 수 (당월·전월은 1개월, 3개월·6개월은 그 기간 전체)
+// months: 차트에 보여줄 개월 수 / headlineMonths: 상단 요약을 집계할 개월 수
+// 모든 프리셋에서 차트는 선택한 기간만큼만 보여준다 (당월/전월=1개월, 3개월/6개월=해당 기간).
 const PRESETS: Record<string, { months: number; offsetMonths: number; headlineMonths: number }> = {
-  prev: { months: 6, offsetMonths: 1, headlineMonths: 1 },
-  today: { months: 6, offsetMonths: 0, headlineMonths: 1 },
+  prev: { months: 1, offsetMonths: 1, headlineMonths: 1 },
+  today: { months: 1, offsetMonths: 0, headlineMonths: 1 },
   "3m": { months: 3, offsetMonths: 0, headlineMonths: 3 },
   "6m": { months: 6, offsetMonths: 0, headlineMonths: 6 },
 };
