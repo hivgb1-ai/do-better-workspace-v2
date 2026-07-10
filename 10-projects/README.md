@@ -28,6 +28,15 @@
 └── 13-marketing-campaign/
 ```
 
+## Do Better Drive 진행
+
+Do Better Drive(`drive-*` 스킬)로 진행하는 프로젝트는 폴더 안 `progress.md`가 **진행의 단일 기준**이다. 1단계 `drive-frame`이 이 파일을 만들며, 형식은 고정이다. (처음이면 초심자 안내: `00-system/03-guides/do-better-drive-사용법.md`)
+
+- frontmatter `status`: `프레임 → 범위 → 계획 → 생산 → 리뷰 → 발행 → 완료` (막히면 `보류`) — 지금 어느 단계인지의 기준
+- 섹션: `목표`(1단계) · `실현성 점검`(2단계) · `계획`+`합격 기준`(3단계) · `생산`(4단계) · `검토`(5단계) · `지금 상태` · `다음 한 걸음` · `로그`
+
+각 단계 스킬이 자기 섹션만 채우고 다음 단계로 넘긴다. 아래 `project-template.md`(프로젝트 개요용)와 별개다 — Drive 프로젝트는 이 progress.md를 기준으로 쓴다.
+
 ## 완료 처리
 
 프로젝트가 끝나면:

@@ -31,7 +31,7 @@ tags: [project]
 
 ## 진행 로그
 
-(세부 진행은 `progress.md`에 별도 작성)
+(세부 진행은 `progress.md`에 별도 작성. **Do Better Drive로 진행하는 프로젝트는 이 개요 양식 대신 `drive-frame`이 만드는 progress.md를 단일 기준으로 쓴다** — `10-projects/README.md`의 "Do Better Drive 진행" 참조.)
 
 ## 참고 자료
 
