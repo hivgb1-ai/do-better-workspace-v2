@@ -71,9 +71,9 @@ export function MilkrunChannelChart({ months, revenue, milkrunCost, ratio }: Mil
           type="monotone"
           dataKey="ratio"
           name="물류비율"
-          stroke="var(--chart-2)"
+          stroke="var(--chart-4)"
           strokeWidth={2}
-          dot={{ r: 4, fill: "var(--chart-2)" }}
+          dot={{ r: 4, fill: "var(--chart-4)", stroke: "var(--card)", strokeWidth: 1.5 }}
           isAnimationActive={false}
         >
           <LabelList
@@ -81,7 +81,11 @@ export function MilkrunChannelChart({ months, revenue, milkrunCost, ratio }: Mil
             position="top"
             formatter={(v) => (typeof v === "number" ? `${v.toFixed(2)}%` : "")}
             fontSize={11}
-            fill="var(--chart-2)"
+            fontWeight={700}
+            fill="var(--chart-4)"
+            stroke="var(--card)"
+            strokeWidth={3}
+            paintOrder="stroke"
           />
         </Line>
       </ComposedChart>
