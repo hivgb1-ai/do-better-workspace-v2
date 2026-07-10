@@ -16,7 +16,7 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
   const data = months.map((month, i) => {
     const direct = directSavings[i] ?? 0;
     const milkrun = milkrunSavings[i] ?? 0;
-    return { month, direct, milkrun, total: 0, totalLabel: direct + milkrun };
+    return { month, direct, milkrun, totalLabel: direct + milkrun };
   });
 
   return (
@@ -34,18 +34,17 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
           formatter={(value, name) => {
             if (typeof value !== "number") return [value, name];
-            return [`${value.toLocaleString()}원`, name];
+            return [`${Math.round(value).toLocaleString()}원`, name];
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         <Bar dataKey="direct" name="직납 절감액" stackId="total" fill="var(--chart-1)" isAnimationActive={false} />
-        <Bar dataKey="milkrun" name="밀크런 절감액" stackId="total" fill="var(--chart-3)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-        {/* height 0으로 쌓아 스택 맨 위(total)에 TTL 라벨만 표시하는 트릭 */}
-        <Bar dataKey="total" name="TTL" stackId="total" fill="transparent" isAnimationActive={false} legendType="none">
+        <Bar dataKey="milkrun" name="밀크런 절감액" stackId="total" fill="var(--chart-3)" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+          {/* 스택 맨 위(밀크런) 막대에 얹어 합계(TTL) 라벨로 표시 */}
           <LabelList
             dataKey="totalLabel"
             position="top"
-            formatter={(v) => (typeof v === "number" ? v.toLocaleString() : "")}
+            formatter={(v) => (typeof v === "number" ? Math.round(v).toLocaleString() : "")}
             fontSize={12}
             fontWeight={600}
             fill="var(--foreground)"
