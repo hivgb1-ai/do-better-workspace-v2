@@ -155,13 +155,25 @@ async function computeSkuSavingsByYearMonth(rateByKey: Map<string, SavingsRate>)
   return { byYearMonth, byManufacturerYearMonth };
 }
 
-export async function fetchMonthlySavings(): Promise<MonthlySavings[]> {
+export interface ManufacturerSavingsMonth {
+  year: number;
+  month: number;
+  savingsByManufacturer: Record<string, number>;
+}
+
+export interface MonthlySavingsResult {
+  monthly: MonthlySavings[]; // 매출조정 시트에 행이 입력된 달만 (절감비율·비용구성은 매출액 필요)
+  // 출고내역만으로 계산되는 SKU 기반 절감액 — 매출행 여부와 무관하게 출고 데이터가 있는 모든 달 포함 (실시간)
+  manufacturerMonthly: ManufacturerSavingsMonth[];
+}
+
+export async function fetchMonthlySavings(): Promise<MonthlySavingsResult> {
   const [rateByKey, revenueRows] = await Promise.all([fetchRateByKey(), fetchRevenueRows()]);
   const { byYearMonth, byManufacturerYearMonth } = await computeSkuSavingsByYearMonth(rateByKey);
 
   const manufacturers = [...new Set([...rateByKey.keys()].map((k) => k.split("|")[1]))];
 
-  const result: MonthlySavings[] = revenueRows.map((r) => {
+  const monthly: MonthlySavings[] = revenueRows.map((r) => {
     const yearMonth = `${r.year}-${r.month}`;
     const savingsTotal = (byYearMonth.get(yearMonth) ?? 0) + r.adjustment;
     const revenueTotal = r.direct + r.milkrun;
@@ -180,7 +192,17 @@ export async function fetchMonthlySavings(): Promise<MonthlySavings[]> {
       savingsByManufacturer,
     };
   });
+  monthly.sort((a, b) => (a.year === b.year ? a.month - b.month : a.year - b.year));
 
-  result.sort((a, b) => (a.year === b.year ? a.month - b.month : a.year - b.year));
-  return result;
+  const manufacturerMonthly: ManufacturerSavingsMonth[] = [...byYearMonth.keys()].map((yearMonth) => {
+    const [year, month] = yearMonth.split("-").map(Number);
+    const savingsByManufacturer: Record<string, number> = {};
+    for (const m of manufacturers) {
+      savingsByManufacturer[m] = byManufacturerYearMonth.get(`${m}|${yearMonth}`) ?? 0;
+    }
+    return { year, month, savingsByManufacturer };
+  });
+  manufacturerMonthly.sort((a, b) => (a.year === b.year ? a.month - b.month : a.year - b.year));
+
+  return { monthly, manufacturerMonthly };
 }

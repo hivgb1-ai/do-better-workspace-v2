@@ -156,7 +156,7 @@ export default async function HistoryPage({
           <CardContent>
             <SavingsByManufacturerChart
               manufacturers={savings.manufacturers}
-              months={savings.months}
+              months={savings.manufacturerMonths}
               savingsByManufacturerMonth={savings.savingsByManufacturerMonth}
               manufacturerColor={savings.manufacturerColor}
             />

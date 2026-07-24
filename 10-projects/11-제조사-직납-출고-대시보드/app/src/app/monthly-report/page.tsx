@@ -103,12 +103,12 @@ export default async function MonthlyReportPage({
         <CardContent className="flex flex-col gap-4">
           <SavingsByManufacturerChart
             manufacturers={savings.manufacturers}
-            months={savings.months}
+            months={savings.manufacturerMonths}
             savingsByManufacturerMonth={savings.savingsByManufacturerMonth}
             manufacturerColor={savings.manufacturerColor}
           />
           <MonthlyDataTable
-            months={savings.months}
+            months={savings.manufacturerMonths}
             rows={savings.manufacturers.map((mfr) => ({
               label: mfr,
               values: savings.savingsByManufacturerMonth[mfr],

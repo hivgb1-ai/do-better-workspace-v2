@@ -14,11 +14,11 @@ export interface SavingsDashboardData {
   manufacturers: string[];
   manufacturerColor: Record<string, string>;
   savingsByManufacturerMonth: Record<string, number[]>;
+  // 제조사별 절감액 전용 월 라벨 — 출고 데이터 기준(실시간)이라 매출조정 미입력 상태의 당월도 포함될 수 있어 months와 길이가 다를 수 있다
+  manufacturerMonths: string[];
 }
 
-export async function fetchSavingsDashboardData(period: ResolvedPeriod): Promise<SavingsDashboardData> {
-  const all = await fetchMonthlySavings(); // 단일 엑셀 파일(한 해) 범위 — §3 선행 작업 이관 전 제약
-
+function filterByPeriod<T extends { year: number; month: number }>(all: T[], period: ResolvedPeriod): T[] {
   let pool = all;
   if (period.endYear && period.endMonth) {
     pool = all.filter(
@@ -27,14 +27,20 @@ export async function fetchSavingsDashboardData(period: ResolvedPeriod): Promise
   } else if (period.offsetMonths > 0) {
     pool = period.offsetMonths < all.length ? all.slice(0, all.length - period.offsetMonths) : [];
   }
+  return pool.slice(-period.months);
+}
 
-  const recent = pool.slice(-period.months);
+export async function fetchSavingsDashboardData(period: ResolvedPeriod): Promise<SavingsDashboardData> {
+  const { monthly: all, manufacturerMonthly: allManufacturer } = await fetchMonthlySavings(); // 단일 엑셀 파일(한 해) 범위 — §3 선행 작업 이관 전 제약
 
-  const manufacturers = orderManufacturers(recent.flatMap((m) => Object.keys(m.savingsByManufacturer)));
+  const recent = filterByPeriod(all, period);
+  const manuRecent = filterByPeriod(allManufacturer, period);
+
+  const manufacturers = orderManufacturers(manuRecent.flatMap((m) => Object.keys(m.savingsByManufacturer)));
   const manufacturerColor = assignManufacturerColors(manufacturers);
   const savingsByManufacturerMonth: Record<string, number[]> = {};
   manufacturers.forEach((mfr) => {
-    savingsByManufacturerMonth[mfr] = recent.map((m) => m.savingsByManufacturer[mfr] ?? 0);
+    savingsByManufacturerMonth[mfr] = manuRecent.map((m) => m.savingsByManufacturer[mfr] ?? 0);
   });
 
   return {
@@ -47,5 +53,6 @@ export async function fetchSavingsDashboardData(period: ResolvedPeriod): Promise
     manufacturers,
     manufacturerColor,
     savingsByManufacturerMonth,
+    manufacturerMonths: manuRecent.map((m) => `${m.month}월`),
   };
 }
