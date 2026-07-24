@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SavingsRatioChart } from "@/components/dashboard/savings-ratio-chart";
 import { CostCompositionChart } from "@/components/dashboard/cost-composition-chart";
+import { SavingsByManufacturerChart } from "@/components/dashboard/savings-by-manufacturer-chart";
 import { MilkrunChannelChart } from "@/components/dashboard/milkrun-channel-chart";
 import { TotalSavingsChart } from "@/components/dashboard/total-savings-chart";
 import { MonthlyDataTable } from "@/components/dashboard/monthly-data-table";
@@ -91,6 +92,28 @@ export default async function MonthlyReportPage({
               { label: "절감액", values: savings.savingsTotalByMonth, unit: "won" },
               { label: "절감비율", values: savings.savingsRatioByMonth, unit: "percent" },
             ]}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">쿠팡로켓 직납 절감액 (제조사별)</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <SavingsByManufacturerChart
+            manufacturers={savings.manufacturers}
+            months={savings.months}
+            savingsByManufacturerMonth={savings.savingsByManufacturerMonth}
+            manufacturerColor={savings.manufacturerColor}
+          />
+          <MonthlyDataTable
+            months={savings.months}
+            rows={savings.manufacturers.map((mfr) => ({
+              label: mfr,
+              values: savings.savingsByManufacturerMonth[mfr],
+              unit: "won",
+            }))}
           />
         </CardContent>
       </Card>

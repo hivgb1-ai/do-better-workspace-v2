@@ -1,8 +1,6 @@
 import { fetchShipmentSource } from "./shipment-source";
+import { orderManufacturers, assignManufacturerColors } from "./manufacturer-color";
 import type { ResolvedPeriod } from "./period";
-
-const KNOWN_ORDER = ["튤립", "오케이에프", "건강한사람들"];
-const CHART_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
 
 export interface MoverItem {
   name: string;
@@ -84,16 +82,8 @@ export async function fetchShipmentDashboardData(period: ResolvedPeriod): Promis
   const months = monthStarts.map((d) => `${d.getMonth() + 1}월`);
   const monthKeys = monthStarts.map(monthKey);
 
-  const manufacturersSeen = new Set(rows.map((r) => r.manufacturer));
-  const manufacturers = [
-    ...KNOWN_ORDER.filter((m) => manufacturersSeen.has(m)),
-    ...[...manufacturersSeen].filter((m) => !KNOWN_ORDER.includes(m)).sort(),
-  ];
-
-  const manufacturerColor: Record<string, string> = {};
-  manufacturers.forEach((m, i) => {
-    manufacturerColor[m] = CHART_COLORS[i % CHART_COLORS.length];
-  });
+  const manufacturers = orderManufacturers(rows.map((r) => r.manufacturer));
+  const manufacturerColor = assignManufacturerColors(manufacturers);
 
   const shipmentByMonth: Record<string, number[]> = {};
   manufacturers.forEach((m) => {

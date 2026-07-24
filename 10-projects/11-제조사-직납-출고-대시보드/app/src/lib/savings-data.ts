@@ -1,4 +1,5 @@
 import { fetchMonthlySavings } from "./savings-source";
+import { orderManufacturers, assignManufacturerColors } from "./manufacturer-color";
 import type { ResolvedPeriod } from "./period";
 
 export const SAVINGS_RATIO_TARGET = 1.6;
@@ -10,6 +11,9 @@ export interface SavingsDashboardData {
   savingsTotalByMonth: number[];
   directCostByMonth: number[];
   milkrunCostByMonth: number[];
+  manufacturers: string[];
+  manufacturerColor: Record<string, string>;
+  savingsByManufacturerMonth: Record<string, number[]>;
 }
 
 export async function fetchSavingsDashboardData(period: ResolvedPeriod): Promise<SavingsDashboardData> {
@@ -26,6 +30,13 @@ export async function fetchSavingsDashboardData(period: ResolvedPeriod): Promise
 
   const recent = pool.slice(-period.months);
 
+  const manufacturers = orderManufacturers(recent.flatMap((m) => Object.keys(m.savingsByManufacturer)));
+  const manufacturerColor = assignManufacturerColors(manufacturers);
+  const savingsByManufacturerMonth: Record<string, number[]> = {};
+  manufacturers.forEach((mfr) => {
+    savingsByManufacturerMonth[mfr] = recent.map((m) => m.savingsByManufacturer[mfr] ?? 0);
+  });
+
   return {
     months: recent.map((m) => `${m.month}월`),
     savingsRatioByMonth: recent.map((m) => m.ratio),
@@ -33,5 +44,8 @@ export async function fetchSavingsDashboardData(period: ResolvedPeriod): Promise
     savingsTotalByMonth: recent.map((m) => m.savingsTotal),
     directCostByMonth: recent.map((m) => m.directCost),
     milkrunCostByMonth: recent.map((m) => m.milkrunCost),
+    manufacturers,
+    manufacturerColor,
+    savingsByManufacturerMonth,
   };
 }

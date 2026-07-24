@@ -3,6 +3,7 @@ import { KpiCard } from "@/components/dashboard/kpi-card";
 import { MonthlyShipmentChart } from "@/components/dashboard/monthly-shipment-chart";
 import { SavingsRatioChart } from "@/components/dashboard/savings-ratio-chart";
 import { CostCompositionChart } from "@/components/dashboard/cost-composition-chart";
+import { SavingsByManufacturerChart } from "@/components/dashboard/savings-by-manufacturer-chart";
 import { TopMoversTable } from "@/components/dashboard/top-movers-table";
 import { PeriodFilter } from "@/components/dashboard/period-filter";
 import { fetchShipmentDashboardData } from "@/lib/shipment-data";
@@ -142,6 +143,22 @@ export default async function HistoryPage({
               months={savings.months}
               directCosts={savings.directCostByMonth}
               milkrunCosts={savings.milkrunCostByMonth}
+            />
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">선택 기간 제조사별 월별 절감액 (SKU 기반, 추가물류비조정 제외)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SavingsByManufacturerChart
+              manufacturers={savings.manufacturers}
+              months={savings.months}
+              savingsByManufacturerMonth={savings.savingsByManufacturerMonth}
+              manufacturerColor={savings.manufacturerColor}
             />
           </CardContent>
         </Card>
