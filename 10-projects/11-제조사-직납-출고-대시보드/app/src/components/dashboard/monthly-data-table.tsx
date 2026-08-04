@@ -10,6 +10,9 @@ export interface MonthlyDataRow {
 interface MonthlyDataTableProps {
   months: string[];
   rows: MonthlyDataRow[];
+  // 위 차트에 오른쪽 보조 축(물류비율 등 %)이 있어서 플롯 영역이 그만큼 좁을 때, 표에도 똑같은 폭의
+  // 빈 여백 컬럼을 붙여 월 컬럼들의 x좌표를 차트와 맞춘다. TABLE_RIGHT_GUTTER를 넘긴다.
+  rightGutter?: number;
 }
 
 function formatValue(v: number, unit: MonthlyDataRow["unit"]) {
@@ -17,7 +20,7 @@ function formatValue(v: number, unit: MonthlyDataRow["unit"]) {
   return Math.round(v).toLocaleString();
 }
 
-export function MonthlyDataTable({ months, rows }: MonthlyDataTableProps) {
+export function MonthlyDataTable({ months, rows, rightGutter }: MonthlyDataTableProps) {
   return (
     // table-layout: fixed + colgroup로 월 컬럼을 모두 같은 폭으로 강제 — 안 그러면 값의 자릿수(예: "795,520" vs
     // "1,375,506,374")에 따라 컬럼 폭이 제각각이라 위 차트의 막대 위치와 어긋나 보인다(달 수가 많을수록 더 심해짐).
@@ -29,6 +32,7 @@ export function MonthlyDataTable({ months, rows }: MonthlyDataTableProps) {
         {months.map((m) => (
           <col key={m} />
         ))}
+        {rightGutter ? <col style={{ width: rightGutter }} /> : null}
       </colgroup>
       <TableHeader>
         <TableRow>
@@ -38,6 +42,7 @@ export function MonthlyDataTable({ months, rows }: MonthlyDataTableProps) {
               {m}
             </TableHead>
           ))}
+          {rightGutter ? <TableHead aria-hidden /> : null}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -49,6 +54,7 @@ export function MonthlyDataTable({ months, rows }: MonthlyDataTableProps) {
                 {formatValue(v, row.unit)}
               </TableCell>
             ))}
+            {rightGutter ? <TableCell aria-hidden /> : null}
           </TableRow>
         ))}
       </TableBody>

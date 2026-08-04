@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { TABLE_LABEL_COL_WIDTH } from "@/lib/chart-layout";
+import { TABLE_LABEL_COL_WIDTH, RIGHT_AXIS_WIDTH } from "@/lib/chart-layout";
 
 interface SavingsRatioChartProps {
   months: string[];
@@ -52,6 +52,7 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, targets }: Sa
         <YAxis
           yAxisId="ratio"
           orientation="right"
+          width={RIGHT_AXIS_WIDTH}
           tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
           axisLine={false}
           tickLine={false}

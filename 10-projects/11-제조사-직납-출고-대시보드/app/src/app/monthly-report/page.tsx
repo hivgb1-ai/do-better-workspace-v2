@@ -11,6 +11,7 @@ import { fetchSavingsDashboardData } from "@/lib/savings-data";
 import { fetchMilkrunDashboardData } from "@/lib/milkrun-data";
 import { resolvePeriod, type PeriodSearchParams } from "@/lib/period";
 import { monthLabelsFor } from "@/lib/month-label";
+import { TABLE_RIGHT_GUTTER } from "@/lib/chart-layout";
 
 export const revalidate = 0;
 
@@ -116,6 +117,7 @@ export default async function MonthlyReportPage({
           />
           <MonthlyDataTable
             months={savings.months}
+            rightGutter={TABLE_RIGHT_GUTTER}
             rows={[
               { label: "절감액", values: savings.savingsTotalByMonth, unit: "won" },
               { label: "절감비율", values: savings.savingsRatioByMonth, unit: "percent" },
@@ -159,6 +161,7 @@ export default async function MonthlyReportPage({
           />
           <MonthlyDataTable
             months={milkrun.months}
+            rightGutter={TABLE_RIGHT_GUTTER}
             rows={[
               { label: "총매출", values: milkrun.rocketRevenueByMonth, unit: "won" },
               { label: "밀크런", values: milkrun.rocketMilkrunCostByMonth, unit: "won" },
@@ -180,6 +183,7 @@ export default async function MonthlyReportPage({
           />
           <MonthlyDataTable
             months={milkrun.months}
+            rightGutter={TABLE_RIGHT_GUTTER}
             rows={[
               { label: "총매출", values: milkrun.freshRevenueByMonth, unit: "won" },
               { label: "밀크런", values: milkrun.freshMilkrunCostByMonth, unit: "won" },
