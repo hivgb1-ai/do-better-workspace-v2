@@ -66,18 +66,16 @@ export default async function MonthlyReportPage({
         </div>
       </div>
 
-      <Card>
+      <Card id="card-direct-ratio">
         <CardHeader>
           <CardTitle className="text-sm">쿠팡로켓 직납비율 (직납 vs 밀크런&쉽먼트 매출 비중)</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div id="chart-direct-ratio">
-            <CostCompositionChart
-              months={savings.months}
-              directCosts={savings.directCostByMonth}
-              milkrunCosts={savings.milkrunCostByMonth}
-            />
-          </div>
+          <CostCompositionChart
+            months={savings.months}
+            directCosts={savings.directCostByMonth}
+            milkrunCosts={savings.milkrunCostByMonth}
+          />
           <MonthlyDataTable
             months={savings.months}
             rows={[
@@ -90,19 +88,17 @@ export default async function MonthlyReportPage({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="card-savings-ratio">
         <CardHeader>
           <CardTitle className="text-sm">쿠팡로켓 직납 절감액</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div id="chart-savings-ratio">
-            <SavingsRatioChart
-              months={savings.months}
-              ratios={savings.savingsRatioByMonth}
-              savingsTotals={savings.savingsTotalByMonth}
-              targets={savings.savingsRatioTargetByMonth}
-            />
-          </div>
+          <SavingsRatioChart
+            months={savings.months}
+            ratios={savings.savingsRatioByMonth}
+            savingsTotals={savings.savingsTotalByMonth}
+            targets={savings.savingsRatioTargetByMonth}
+          />
           <MonthlyDataTable
             months={savings.months}
             rows={[
@@ -113,19 +109,17 @@ export default async function MonthlyReportPage({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="card-manufacturer-savings">
         <CardHeader>
           <CardTitle className="text-sm">쿠팡로켓 직납 절감액 (제조사별)</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div id="chart-manufacturer-savings">
-            <SavingsByManufacturerChart
-              manufacturers={savings.manufacturers}
-              months={savings.manufacturerMonths}
-              savingsByManufacturerMonth={savings.savingsByManufacturerMonth}
-              manufacturerColor={savings.manufacturerColor}
-            />
-          </div>
+          <SavingsByManufacturerChart
+            manufacturers={savings.manufacturers}
+            months={savings.manufacturerMonths}
+            savingsByManufacturerMonth={savings.savingsByManufacturerMonth}
+            manufacturerColor={savings.manufacturerColor}
+          />
           <MonthlyDataTable
             months={savings.manufacturerMonths}
             rows={savings.manufacturers.map((mfr) => ({
@@ -137,19 +131,17 @@ export default async function MonthlyReportPage({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="card-rocket-milkrun">
         <CardHeader>
           <CardTitle className="text-sm">쿠팡 로켓 밀크런</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div id="chart-rocket-milkrun">
-            <MilkrunChannelChart
-              months={milkrun.months}
-              revenue={milkrun.rocketRevenueByMonth}
-              milkrunCost={milkrun.rocketMilkrunCostByMonth}
-              ratio={milkrun.rocketRatioByMonth}
-            />
-          </div>
+          <MilkrunChannelChart
+            months={milkrun.months}
+            revenue={milkrun.rocketRevenueByMonth}
+            milkrunCost={milkrun.rocketMilkrunCostByMonth}
+            ratio={milkrun.rocketRatioByMonth}
+          />
           <MonthlyDataTable
             months={milkrun.months}
             rows={[
@@ -160,19 +152,17 @@ export default async function MonthlyReportPage({
           />
         </CardContent>
       </Card>
-      <Card>
+      <Card id="card-fresh-milkrun">
         <CardHeader>
           <CardTitle className="text-sm">쿠팡 프레시 밀크런</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div id="chart-fresh-milkrun">
-            <MilkrunChannelChart
-              months={milkrun.months}
-              revenue={milkrun.freshRevenueByMonth}
-              milkrunCost={milkrun.freshMilkrunCostByMonth}
-              ratio={milkrun.freshRatioByMonth}
-            />
-          </div>
+          <MilkrunChannelChart
+            months={milkrun.months}
+            revenue={milkrun.freshRevenueByMonth}
+            milkrunCost={milkrun.freshMilkrunCostByMonth}
+            ratio={milkrun.freshRatioByMonth}
+          />
           <MonthlyDataTable
             months={milkrun.months}
             rows={[
@@ -184,18 +174,16 @@ export default async function MonthlyReportPage({
         </CardContent>
       </Card>
 
-      <Card>
+      <Card id="card-total-savings">
         <CardHeader>
           <CardTitle className="text-sm">TOTAL 절감액 (직납 + 밀크런/쉽먼트 이원화)</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div id="chart-total-savings">
-            <TotalSavingsChart
-              months={savings.months}
-              directSavings={savings.savingsTotalByMonth}
-              milkrunSavings={milkrun.milkrunSavingsByMonth}
-            />
-          </div>
+          <TotalSavingsChart
+            months={savings.months}
+            directSavings={savings.savingsTotalByMonth}
+            milkrunSavings={milkrun.milkrunSavingsByMonth}
+          />
           <MonthlyDataTable
             months={savings.months}
             rows={[
