@@ -20,6 +20,7 @@ const PERIOD_OPTIONS = [
   { value: "today", label: "당월" },
   { value: "3m", label: "3개월" },
   { value: "6m", label: "6개월" },
+  { value: "1y", label: "1년" },
   { value: "custom", label: "기간 지정" },
 ];
 
