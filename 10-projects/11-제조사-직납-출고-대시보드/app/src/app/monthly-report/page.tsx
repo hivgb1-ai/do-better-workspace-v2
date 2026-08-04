@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import { SavingsRatioChart } from "@/components/dashboard/savings-ratio-chart";
 import { CostCompositionChart } from "@/components/dashboard/cost-composition-chart";
 import { SavingsByManufacturerChart } from "@/components/dashboard/savings-by-manufacturer-chart";
@@ -25,7 +26,14 @@ export default async function MonthlyReportPage({
 }: {
   searchParams: Promise<PeriodSearchParams>;
 }) {
-  const period = resolvePeriod(await searchParams, "today");
+  const sp = await searchParams;
+  const period = resolvePeriod(sp, "today");
+
+  const exportQuery = new URLSearchParams();
+  if (sp.p) exportQuery.set("p", sp.p);
+  if (sp.from) exportQuery.set("from", sp.from);
+  if (sp.to) exportQuery.set("to", sp.to);
+  const exportHref = `/api/monthly-report/export?${exportQuery.toString()}`;
 
   const [savings, milkrun] = await Promise.all([
     fetchSavingsDashboardData(period),
@@ -50,7 +58,12 @@ export default async function MonthlyReportPage({
           <h2 className="text-lg font-semibold">{rangeLabel} 월말 보고</h2>
           <p className="text-sm text-muted-foreground">쿠팡 물류비용절감 KPI — 직납비율 · 직납/밀크런 절감액</p>
         </div>
-        <PeriodFilter options={PERIOD_OPTIONS} defaultValue="today" />
+        <div className="flex items-center gap-2">
+          <a href={exportHref} className={buttonVariants({ variant: "outline", size: "sm" })}>
+            엑셀 다운로드
+          </a>
+          <PeriodFilter options={PERIOD_OPTIONS} defaultValue="today" />
+        </div>
       </div>
 
       <Card>
