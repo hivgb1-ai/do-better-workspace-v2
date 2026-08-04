@@ -79,7 +79,7 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, targets }: Sa
         />
         <Line
           yAxisId="ratio"
-          type="stepAfter"
+          type="linear"
           dataKey="target"
           name="목표"
           stroke="var(--critical)"
