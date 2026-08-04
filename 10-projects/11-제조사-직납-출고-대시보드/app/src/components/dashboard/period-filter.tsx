@@ -69,7 +69,7 @@ export function PeriodFilter({ options, defaultValue }: PeriodFilterProps) {
           <select
             value={fromYear}
             onChange={(e) => setFromYear(e.target.value)}
-            className="rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs"
+            className="rounded-md border border-input bg-background px-1.5 py-0.5 text-xs text-foreground"
           >
             {yearOptions.map((y) => (
               <option key={y} value={y}>
@@ -80,7 +80,7 @@ export function PeriodFilter({ options, defaultValue }: PeriodFilterProps) {
           <select
             value={fromMonth}
             onChange={(e) => setFromMonth(e.target.value)}
-            className="rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs"
+            className="rounded-md border border-input bg-background px-1.5 py-0.5 text-xs text-foreground"
           >
             {MONTH_OPTIONS.map((m) => (
               <option key={m} value={m}>
@@ -92,7 +92,7 @@ export function PeriodFilter({ options, defaultValue }: PeriodFilterProps) {
           <select
             value={toYear}
             onChange={(e) => setToYear(e.target.value)}
-            className="rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs"
+            className="rounded-md border border-input bg-background px-1.5 py-0.5 text-xs text-foreground"
           >
             {yearOptions.map((y) => (
               <option key={y} value={y}>
@@ -103,7 +103,7 @@ export function PeriodFilter({ options, defaultValue }: PeriodFilterProps) {
           <select
             value={toMonth}
             onChange={(e) => setToMonth(e.target.value)}
-            className="rounded-md border border-input bg-transparent px-1.5 py-0.5 text-xs"
+            className="rounded-md border border-input bg-background px-1.5 py-0.5 text-xs text-foreground"
           >
             {MONTH_OPTIONS.map((m) => (
               <option key={m} value={m}>
