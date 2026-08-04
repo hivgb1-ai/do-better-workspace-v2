@@ -1,6 +1,7 @@
 "use client";
 
 import { Bar, CartesianGrid, ComposedChart, LabelList, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { TABLE_LABEL_COL_WIDTH } from "@/lib/chart-layout";
 
 interface TotalSavingsChartProps {
   months: string[];
@@ -25,6 +26,7 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
         <CartesianGrid vertical={false} stroke="var(--border)" />
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
         <YAxis
+          width={TABLE_LABEL_COL_WIDTH}
           tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
           axisLine={false}
           tickLine={false}

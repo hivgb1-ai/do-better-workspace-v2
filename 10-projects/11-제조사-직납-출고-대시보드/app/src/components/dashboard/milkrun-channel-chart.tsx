@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { TABLE_LABEL_COL_WIDTH } from "@/lib/chart-layout";
 
 interface MilkrunChannelChartProps {
   months: string[];
@@ -41,6 +42,7 @@ export function MilkrunChannelChart({ months, revenue, milkrunCost, ratio }: Mil
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
         <YAxis
           yAxisId="amount"
+          width={TABLE_LABEL_COL_WIDTH}
           tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
           axisLine={false}
           tickLine={false}

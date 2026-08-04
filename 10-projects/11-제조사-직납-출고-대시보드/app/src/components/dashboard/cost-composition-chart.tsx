@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { TABLE_LABEL_COL_WIDTH } from "@/lib/chart-layout";
 
 interface CostCompositionChartProps {
   months: string[];
@@ -41,6 +42,7 @@ export function CostCompositionChart({ months, directCosts, milkrunCosts }: Cost
         <CartesianGrid vertical={false} stroke="var(--border)" />
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
         <YAxis
+          width={TABLE_LABEL_COL_WIDTH}
           tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
           axisLine={false}
           tickLine={false}

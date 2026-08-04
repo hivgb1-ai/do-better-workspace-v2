@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { TABLE_LABEL_COL_WIDTH } from "@/lib/chart-layout";
 
 interface SavingsByManufacturerChartProps {
   manufacturers: string[];
@@ -36,10 +37,11 @@ export function SavingsByManufacturerChart({
 
   return (
     <ResponsiveContainer width="100%" height={260}>
-      <BarChart data={data} barGap={2} barCategoryGap={24}>
+      <BarChart data={data} barGap={2} barCategoryGap={24} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
         <CartesianGrid vertical={false} stroke="var(--border)" />
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
         <YAxis
+          width={TABLE_LABEL_COL_WIDTH}
           tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
           axisLine={false}
           tickLine={false}
