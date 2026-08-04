@@ -3,6 +3,7 @@ import { fetchShipmentSource } from "./shipment-source";
 
 const RATE_TAB = "직납 요율표";
 const REVENUE_TAB = "직납 매출조정";
+const MANUFACTURER_ADJUSTMENT_TAB = "제조사별 추가물류비조정";
 
 // 보관비 절감액 = PLT수량 × 700원 × 4일, 전 품목 공통 (직납 요율표에는 없음)
 const STORAGE_SAVINGS_PER_PLT = 2800;
@@ -15,7 +16,7 @@ export interface MonthlySavings {
   ratio: number; // %
   directCost: number; // 직납
   milkrunCost: number; // 밀크런&쉽먼트
-  // SKU 기반 절감액만의 제조사별 분해 — "추가물류비조정"(수동 조정액)은 특정 제조사에 귀속되지 않아 제외됨
+  // SKU 기반 절감액 + 제조사 귀속 조정액("제조사별 추가물류비조정" 탭) + "직납 매출조정"의 "추가물류비조정"(전액 건강한사람들 귀속)
   savingsByManufacturer: Record<string, number>;
 }
 
@@ -86,8 +87,11 @@ interface RevenueRow {
   month: number;
   direct: number;
   milkrun: number;
-  adjustment: number; // "추가 물류비" 등 SKU에 속하지 않는 수동 조정액
+  adjustment: number; // "추가 물류비" — 전액 건강한사람들 귀속 조정액(사용자 확정 규칙)
 }
+
+// "직납 매출조정" 탭의 "추가물류비조정" 컬럼은 전부 건강한사람들 추가 물류비라, 제조사별 절감액에서 이 제조사분만 차감한다.
+const REVENUE_ADJUSTMENT_MANUFACTURER = "건강한사람들";
 
 // 이 달이 결과에 포함되는 기준: 매출 행이 입력됐는가 — 담당자가 매달 이 탭에 한 줄 추가하는 방식
 async function fetchRevenueRows(): Promise<RevenueRow[]> {
@@ -114,6 +118,44 @@ async function fetchRevenueRows(): Promise<RevenueRow[]> {
       milkrun: parseNum(row[milkrunCol]) ?? 0,
       adjustment: parseNum(row[adjCol]) ?? 0,
     });
+  }
+  return rows;
+}
+
+interface ManufacturerAdjustmentRow {
+  year: number;
+  month: number;
+  manufacturer: string;
+  amount: number; // 특정 제조사 귀속 조정액 — 비용 발생 시 음수로 입력 (예: 건강한사람들 추가 물류비)
+}
+
+// 요율표로 못 잡는, 특정 제조사에만 발생하는 불규칙 비용/조정을 담당자가 직접 한 줄씩 추가하는 탭.
+// "직납 매출조정" 탭의 (제조사 미귀속) "추가물류비조정"과는 별개 — 이 탭에 옮긴 금액은 그쪽에서 빼야 이중 반영되지 않는다.
+async function fetchManufacturerAdjustments(): Promise<ManufacturerAdjustmentRow[]> {
+  let values: string[][];
+  try {
+    values = await fetchSheetValues(MANUFACTURER_ADJUSTMENT_TAB);
+  } catch {
+    return []; // 탭이 아직 시트에 없으면 조정 없음으로 취급 — 탭 생성 전에도 나머지 대시보드는 정상 동작
+  }
+  if (values.length === 0) return [];
+
+  const header = values[0] ?? [];
+  const yearCol = header.indexOf("연도");
+  const monthCol = header.indexOf("월");
+  const manuCol = header.indexOf("제조사");
+  const amountCol = header.indexOf("금액");
+  if ([yearCol, monthCol, manuCol, amountCol].some((c) => c < 0)) {
+    throw new Error(`${MANUFACTURER_ADJUSTMENT_TAB}: 필수 헤더(연도/월/제조사/금액)를 찾을 수 없습니다`);
+  }
+
+  const rows: ManufacturerAdjustmentRow[] = [];
+  for (const row of values.slice(1)) {
+    const year = parseNum(row[yearCol]);
+    const month = parseNum(row[monthCol]);
+    const manufacturer = row[manuCol]?.trim();
+    if (year === null || month === null || !manufacturer) continue;
+    rows.push({ year, month, manufacturer: normalizeManufacturer(manufacturer), amount: parseNum(row[amountCol]) ?? 0 });
   }
   return rows;
 }
@@ -168,19 +210,53 @@ export interface MonthlySavingsResult {
 }
 
 export async function fetchMonthlySavings(): Promise<MonthlySavingsResult> {
-  const [rateByKey, revenueRows] = await Promise.all([fetchRateByKey(), fetchRevenueRows()]);
+  const [rateByKey, revenueRows, manufacturerAdjustments] = await Promise.all([
+    fetchRateByKey(),
+    fetchRevenueRows(),
+    fetchManufacturerAdjustments(),
+  ]);
   const { byYearMonth, byManufacturerYearMonth } = await computeSkuSavingsByYearMonth(rateByKey);
 
-  const manufacturers = [...new Set([...rateByKey.keys()].map((k) => k.split("|")[1]))];
+  const revenueAdjManufacturer = normalizeManufacturer(REVENUE_ADJUSTMENT_MANUFACTURER);
+  const manufacturers = [
+    ...new Set([
+      ...[...rateByKey.keys()].map((k) => k.split("|")[1]),
+      ...manufacturerAdjustments.map((a) => a.manufacturer),
+      revenueAdjManufacturer,
+    ]),
+  ];
+
+  // 제조사 귀속 조정액을 (제조사|연월) 및 (연월) 단위로 미리 합산
+  const adjByManufacturerYearMonth = new Map<string, number>();
+  const adjByYearMonth = new Map<string, number>();
+  for (const a of manufacturerAdjustments) {
+    const yearMonth = `${a.year}-${a.month}`;
+    adjByManufacturerYearMonth.set(
+      `${a.manufacturer}|${yearMonth}`,
+      (adjByManufacturerYearMonth.get(`${a.manufacturer}|${yearMonth}`) ?? 0) + a.amount
+    );
+    adjByYearMonth.set(yearMonth, (adjByYearMonth.get(yearMonth) ?? 0) + a.amount);
+  }
+
+  // "직납 매출조정" 탭의 "추가물류비조정" 컬럼 — 전액 건강한사람들 귀속(연월 단위로 합산)
+  const revenueAdjByYearMonth = new Map<string, number>();
+  for (const r of revenueRows) {
+    if (!r.adjustment) continue;
+    const yearMonth = `${r.year}-${r.month}`;
+    revenueAdjByYearMonth.set(yearMonth, (revenueAdjByYearMonth.get(yearMonth) ?? 0) + r.adjustment);
+  }
 
   const monthly: MonthlySavings[] = revenueRows.map((r) => {
     const yearMonth = `${r.year}-${r.month}`;
-    const savingsTotal = (byYearMonth.get(yearMonth) ?? 0) + r.adjustment;
+    const savingsTotal = (byYearMonth.get(yearMonth) ?? 0) + r.adjustment + (adjByYearMonth.get(yearMonth) ?? 0);
     const revenueTotal = r.direct + r.milkrun;
     const savingsByManufacturer: Record<string, number> = {};
     for (const m of manufacturers) {
-      savingsByManufacturer[m] = byManufacturerYearMonth.get(`${m}|${yearMonth}`) ?? 0;
+      savingsByManufacturer[m] =
+        (byManufacturerYearMonth.get(`${m}|${yearMonth}`) ?? 0) + (adjByManufacturerYearMonth.get(`${m}|${yearMonth}`) ?? 0);
     }
+    savingsByManufacturer[revenueAdjManufacturer] =
+      (savingsByManufacturer[revenueAdjManufacturer] ?? 0) + (revenueAdjByYearMonth.get(yearMonth) ?? 0);
     return {
       year: r.year,
       month: r.month,
@@ -194,12 +270,17 @@ export async function fetchMonthlySavings(): Promise<MonthlySavingsResult> {
   });
   monthly.sort((a, b) => (a.year === b.year ? a.month - b.month : a.year - b.year));
 
-  const manufacturerMonthly: ManufacturerSavingsMonth[] = [...byYearMonth.keys()].map((yearMonth) => {
+  // 실시간 제조사별 절감액: 출고 데이터가 있는 달 + 제조사 조정만 입력된 달(출고 이전에 조정부터 들어온 경우 대비) 모두 포함
+  const manufacturerYearMonths = new Set([...byYearMonth.keys(), ...adjByYearMonth.keys(), ...revenueAdjByYearMonth.keys()]);
+  const manufacturerMonthly: ManufacturerSavingsMonth[] = [...manufacturerYearMonths].map((yearMonth) => {
     const [year, month] = yearMonth.split("-").map(Number);
     const savingsByManufacturer: Record<string, number> = {};
     for (const m of manufacturers) {
-      savingsByManufacturer[m] = byManufacturerYearMonth.get(`${m}|${yearMonth}`) ?? 0;
+      savingsByManufacturer[m] =
+        (byManufacturerYearMonth.get(`${m}|${yearMonth}`) ?? 0) + (adjByManufacturerYearMonth.get(`${m}|${yearMonth}`) ?? 0);
     }
+    savingsByManufacturer[revenueAdjManufacturer] =
+      (savingsByManufacturer[revenueAdjManufacturer] ?? 0) + (revenueAdjByYearMonth.get(yearMonth) ?? 0);
     return { year, month, savingsByManufacturer };
   });
   manufacturerMonthly.sort((a, b) => (a.year === b.year ? a.month - b.month : a.year - b.year));
