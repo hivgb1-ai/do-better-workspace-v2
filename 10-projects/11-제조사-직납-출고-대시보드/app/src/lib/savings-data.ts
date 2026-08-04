@@ -19,14 +19,9 @@ export interface SavingsDashboardData {
 }
 
 function filterByPeriod<T extends { year: number; month: number }>(all: T[], period: ResolvedPeriod): T[] {
-  let pool = all;
-  if (period.endYear && period.endMonth) {
-    pool = all.filter(
-      (m) => m.year < period.endYear! || (m.year === period.endYear && m.month <= period.endMonth!)
-    );
-  } else if (period.offsetMonths > 0) {
-    pool = period.offsetMonths < all.length ? all.slice(0, all.length - period.offsetMonths) : [];
-  }
+  const pool = all.filter(
+    (m) => m.year < period.endYear || (m.year === period.endYear && m.month <= period.endMonth)
+  );
   return pool.slice(-period.months);
 }
 

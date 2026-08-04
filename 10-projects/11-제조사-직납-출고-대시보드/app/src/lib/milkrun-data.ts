@@ -15,14 +15,9 @@ export interface MilkrunDashboardData {
 export async function fetchMilkrunDashboardData(period: ResolvedPeriod): Promise<MilkrunDashboardData> {
   const all = await fetchMilkrunMonthly();
 
-  let pool = all;
-  if (period.endYear && period.endMonth) {
-    pool = all.filter(
-      (m) => m.year < period.endYear! || (m.year === period.endYear && m.month <= period.endMonth!)
-    );
-  } else if (period.offsetMonths > 0) {
-    pool = period.offsetMonths < all.length ? all.slice(0, all.length - period.offsetMonths) : [];
-  }
+  const pool = all.filter(
+    (m) => m.year < period.endYear || (m.year === period.endYear && m.month <= period.endMonth)
+  );
 
   const recent = pool.slice(-period.months);
 

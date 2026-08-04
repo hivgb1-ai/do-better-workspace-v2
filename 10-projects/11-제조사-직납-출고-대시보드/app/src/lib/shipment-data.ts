@@ -68,11 +68,7 @@ export async function fetchShipmentDashboardData(period: ResolvedPeriod): Promis
   const { rows, excludedRowCount } = await fetchShipmentSource();
   if (rows.length === 0) return emptyResult(excludedRowCount);
 
-  const latestDate = rows.reduce((max, r) => (r.date > max ? r.date : max), rows[0].date);
-  const currentMonthStart =
-    period.endYear && period.endMonth
-      ? new Date(period.endYear, period.endMonth - 1, 1)
-      : new Date(latestDate.getFullYear(), latestDate.getMonth() - period.offsetMonths, 1);
+  const currentMonthStart = new Date(period.endYear, period.endMonth - 1, 1);
 
   const monthsWindow = period.months;
   const monthStarts = Array.from(
