@@ -156,5 +156,9 @@
 }
 
 html {
-  font-family: var(--font-sans), "Noto Sans KR", sans-serif;
+  /* 주의: --font-sans는 @theme inline에서 자기 자신을 참조("--font-sans: var(--font-sans)")할 뿐
+     실제 값이 정의된 곳이 없어 항상 무효(invalid) — var()에 무효 참조가 하나라도 있으면 그 폰트
+     하나만 스킵되는 게 아니라 font-family 선언 전체가 무효 처리되어 "Noto Sans KR" 폴백까지
+     통째로 무시된다. 그래서 실제로 정의돼 있는 next/font 변수(--font-geist-sans)를 직접 참조. */
+  font-family: var(--font-geist-sans), "Noto Sans KR", sans-serif;
 }
