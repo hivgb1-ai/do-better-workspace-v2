@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import { NextRequest } from "next/server";
 import ExcelJS from "exceljs";
 import chromium from "@sparticuz/chromium";
@@ -30,24 +28,11 @@ const CHART_IDS = [
   "chart-total-savings",
 ] as const;
 
-// @sparticuz/chromium은 Open Sans만 내장하고 있어 한글은 기본적으로 렌더링되지 않는다(글자 자체가
-// 빈 칸으로 사라짐, 네모 대체문자조차 안 뜸). 번들에 포함한 Noto Sans KR을 /tmp/fonts에 풀어
-// fontconfig가 인식하는 기본 검색 경로 중 하나로 등록한다(패키지 문서에 명시된 경로).
-function ensureKoreanFontAvailable() {
-  const destDir = "/tmp/fonts";
-  const destPath = path.join(destDir, "NotoSansKR-Regular.ttf");
-  if (fs.existsSync(destPath)) return; // 같은 인스턴스로 재사용되는 warm invocation에서는 복사 생략
-  fs.mkdirSync(destDir, { recursive: true });
-  const srcPath = path.join(process.cwd(), "assets", "fonts", "NotoSansKR-Regular.ttf");
-  fs.copyFileSync(srcPath, destPath);
-}
-
 async function captureChartImages(pageUrl: string) {
   const images = new Map<string, { buffer: Buffer; width: number; height: number }>();
 
   let browser: Browser | undefined;
   try {
-    ensureKoreanFontAvailable();
     browser = await puppeteer.launch({
       args: await puppeteer.defaultArgs({ args: chromium.args, headless: "shell" }),
       defaultViewport: { width: 1100, height: 900 },
@@ -57,6 +42,10 @@ async function captureChartImages(pageUrl: string) {
     const page = await browser.newPage();
     await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
     await page.goto(pageUrl, { waitUntil: "networkidle0", timeout: 45000 });
+    // @sparticuz/chromium은 한글 시스템 폰트가 없어, globals.css의 Noto Sans KR 웹폰트
+    // (@font-face)가 실제로 로드 완료될 때까지 기다린다 — 안 그러면 차트의 한글 텍스트가
+    // 빈 칸으로 캡처된다.
+    await page.evaluate(() => document.fonts.ready);
 
     for (const id of CHART_IDS) {
       try {

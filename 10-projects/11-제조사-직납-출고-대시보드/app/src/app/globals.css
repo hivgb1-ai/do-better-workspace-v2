@@ -143,3 +143,18 @@
     @apply font-sans;
   }
 }
+
+/* Geist는 라틴 전용이라 한글은 브라우저의 OS 폰트 대체에 의존한다.
+   헤드리스 캡처(엑셀 다운로드용 차트 스크린샷) 환경엔 OS 한글 폰트가 없어
+   글자가 통째로 사라지므로, 웹폰트로 명시적 폴백을 건다 (unlayered라 @layer base보다 우선 적용). */
+@font-face {
+  font-family: "Noto Sans KR";
+  src: url("/fonts/NotoSansKR-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+html {
+  font-family: var(--font-sans), "Noto Sans KR", sans-serif;
+}

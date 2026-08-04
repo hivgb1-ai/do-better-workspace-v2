@@ -11,10 +11,7 @@ const nextConfig: NextConfig = {
   // 조립해 읽어서 같은 이유로 명시 필요 — export 라우트에만 필요하니 해당 경로로 스코프 한정.
   outputFileTracingIncludes: {
     "/*": ["./data/**/*"],
-    "/api/monthly-report/export": [
-      "./node_modules/@sparticuz/chromium/**/*",
-      "./assets/fonts/**/*",
-    ],
+    "/api/monthly-report/export": ["./node_modules/@sparticuz/chromium/**/*"],
   },
 };
 
