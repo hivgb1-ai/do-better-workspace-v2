@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, BarChart, CartesianGrid, LabelList, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, CartesianGrid, ComposedChart, LabelList, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 interface TotalSavingsChartProps {
   months: string[];
@@ -21,7 +21,7 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
 
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <BarChart data={data} margin={{ top: 20, right: 12, left: 0, bottom: 0 }}>
+      <ComposedChart data={data} margin={{ top: 20, right: 12, left: 0, bottom: 0 }}>
         <CartesianGrid vertical={false} stroke="var(--border)" />
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
         <YAxis
@@ -39,8 +39,11 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         <Bar dataKey="direct" name="직납 절감액" stackId="total" fill="var(--chart-1)" maxBarSize={24} isAnimationActive={false} />
-        <Bar dataKey="milkrun" name="밀크런 절감액" stackId="total" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false}>
-          {/* 스택 맨 위(밀크런) 막대에 얹어 합계(TTL) 라벨로 표시 */}
+        <Bar dataKey="milkrun" name="밀크런 절감액" stackId="total" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
+        {/* 합계(TTL) 라벨 전용 — 밀크런 절감액이 0인 달은 그 막대 구간 자체가 그려지지 않아 거기 얹은
+            LabelList도 함께 사라진다(recharts 특성). 값이 0이 될 일이 없는 totalLabel을 보이지 않는
+            선에 실어서, 스택 맨 위 위치에 항상 라벨이 뜨도록 함. */}
+        <Line dataKey="totalLabel" stroke="none" dot={false} legendType="none" isAnimationActive={false}>
           <LabelList
             dataKey="totalLabel"
             position="top"
@@ -49,8 +52,8 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
             fontWeight={600}
             fill="var(--foreground)"
           />
-        </Bar>
-      </BarChart>
+        </Line>
+      </ComposedChart>
     </ResponsiveContainer>
   );
 }
