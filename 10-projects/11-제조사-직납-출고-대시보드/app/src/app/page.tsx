@@ -68,6 +68,8 @@ export default async function OverviewPage({
   const currentRatio = savingsHeadlineSlice.length
     ? savingsHeadlineSlice.reduce((a, b) => a + b, 0) / savingsHeadlineSlice.length
     : 0;
+  // 목표는 기간 중 바뀔 수 있어(2026-07 1.6%→1.3%) 최신 달 기준(현재 적용 중인 목표)으로 비교한다
+  const currentTarget = savings.savingsRatioTargetByMonth.at(-1) ?? 1.6;
 
   const estimatedRevenueForPeriod = headlineMonthLabels.reduce(
     (sum, label) => sum + (estimatedRevenueByMonth.get(Number.parseInt(label, 10)) ?? 0),
@@ -91,11 +93,11 @@ export default async function OverviewPage({
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         <KpiCard
-          label="절감비율 (목표 1.6%)"
+          label={`절감비율 (목표 ${currentTarget}%)`}
           value={`${currentRatio.toFixed(2)}%`}
           delta={{
-            text: currentRatio >= savings.savingsRatioTarget ? "목표 달성" : "목표 미달",
-            tone: currentRatio >= savings.savingsRatioTarget ? "good" : "critical",
+            text: currentRatio >= currentTarget ? "목표 달성" : "목표 미달",
+            tone: currentRatio >= currentTarget ? "good" : "critical",
           }}
         />
         <KpiCard
@@ -142,7 +144,7 @@ export default async function OverviewPage({
             <CardTitle className="text-sm">{rangeLabel} 절감비율 진행률</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center gap-4 pb-6">
-            <GoalRing current={currentRatio} target={savings.savingsRatioTarget} label="절감액 ÷ 매출액" />
+            <GoalRing current={currentRatio} target={currentTarget} label="절감액 ÷ 매출액" />
           </CardContent>
         </Card>
       </div>
@@ -176,7 +178,7 @@ export default async function OverviewPage({
               months={savings.months}
               ratios={savings.savingsRatioByMonth}
               savingsTotals={savings.savingsTotalByMonth}
-              target={savings.savingsRatioTarget}
+              targets={savings.savingsRatioTargetByMonth}
             />
           </CardContent>
         </Card>

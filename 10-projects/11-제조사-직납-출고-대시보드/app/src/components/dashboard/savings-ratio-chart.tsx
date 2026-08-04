@@ -6,7 +6,6 @@ import {
   ComposedChart,
   Legend,
   Line,
-  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -17,20 +16,22 @@ interface SavingsRatioChartProps {
   months: string[];
   ratios: number[];
   savingsTotals: number[];
-  target: number;
+  // 월별 목표치 — 기간 중 목표가 바뀌면(예: 2026-07부터 1.6%→1.3%) 값이 달라질 수 있어 배열로 받는다
+  targets: number[];
 }
 
 function formatEok(value: number) {
   return `${(value / 100_000_000).toFixed(1)}억`;
 }
 
-export function SavingsRatioChart({ months, ratios, savingsTotals, target }: SavingsRatioChartProps) {
+export function SavingsRatioChart({ months, ratios, savingsTotals, targets }: SavingsRatioChartProps) {
   const data = months.map((month, i) => ({
     month,
     ratio: ratios[i],
     savings: savingsTotals[i] ?? 0,
+    target: targets[i],
   }));
-  const ratioMax = Math.ceil((Math.max(...ratios, target, 0) + 0.2) * 10) / 10;
+  const ratioMax = Math.ceil((Math.max(...ratios, ...targets, 0) + 0.2) * 10) / 10;
   const savingsMax = Math.max(...data.map((d) => d.savings), 0) * 1.2;
 
   return (
@@ -63,13 +64,6 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, target }: Sav
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <ReferenceLine
-          yAxisId="ratio"
-          y={target}
-          stroke="var(--critical)"
-          strokeDasharray="4 4"
-          label={{ value: `목표 ${target}%`, position: "insideTopRight", fontSize: 11, fill: "var(--critical)" }}
-        />
         <Bar yAxisId="savings" dataKey="savings" name="절감액" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
         {/* isAnimationActive=false: react-smooth never resolves under React 19,
             leaving the path stuck at its hidden (stroke-dashoffset) starting state */}
@@ -81,6 +75,17 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, target }: Sav
           stroke="var(--chart-4)"
           strokeWidth={2}
           dot={{ r: 4, fill: "var(--chart-4)", stroke: "var(--card)", strokeWidth: 1.5 }}
+          isAnimationActive={false}
+        />
+        <Line
+          yAxisId="ratio"
+          type="stepAfter"
+          dataKey="target"
+          name="목표"
+          stroke="var(--critical)"
+          strokeWidth={1.5}
+          strokeDasharray="4 4"
+          dot={false}
           isAnimationActive={false}
         />
       </ComposedChart>

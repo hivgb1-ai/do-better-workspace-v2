@@ -45,6 +45,8 @@ export default async function HistoryPage({
   const avgRatio = savings.savingsRatioByMonth.length
     ? savings.savingsRatioByMonth.reduce((a, b) => a + b, 0) / savings.savingsRatioByMonth.length
     : 0;
+  // 목표는 기간 중 바뀔 수 있어(2026-07 1.6%→1.3%) 최신 달 기준(현재 적용 중인 목표)으로 비교한다
+  const currentTarget = savings.savingsRatioTargetByMonth.at(-1) ?? 1.6;
 
   const displayMonths = shipment.months.slice(-period.months);
   const displayShipmentByMonth = Object.fromEntries(
@@ -78,8 +80,8 @@ export default async function HistoryPage({
           label="선택 기간 평균 절감비율"
           value={`${avgRatio.toFixed(2)}%`}
           delta={{
-            text: avgRatio >= savings.savingsRatioTarget ? "목표 평균 달성" : "목표 평균 미달",
-            tone: avgRatio >= savings.savingsRatioTarget ? "good" : "critical",
+            text: avgRatio >= currentTarget ? "목표 평균 달성" : "목표 평균 미달",
+            tone: avgRatio >= currentTarget ? "good" : "critical",
           }}
         />
         <KpiCard
@@ -119,7 +121,7 @@ export default async function HistoryPage({
               months={savings.months}
               ratios={savings.savingsRatioByMonth}
               savingsTotals={savings.savingsTotalByMonth}
-              target={savings.savingsRatioTarget}
+              targets={savings.savingsRatioTargetByMonth}
             />
           </CardContent>
         </Card>

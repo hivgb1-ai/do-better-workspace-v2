@@ -84,7 +84,7 @@ export default async function MonthlyReportPage({
             months={savings.months}
             ratios={savings.savingsRatioByMonth}
             savingsTotals={savings.savingsTotalByMonth}
-            target={savings.savingsRatioTarget}
+            targets={savings.savingsRatioTargetByMonth}
           />
           <MonthlyDataTable
             months={savings.months}
