@@ -11,7 +11,7 @@ export async function getGoogleSheetsAccessToken(): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const unsigned = `${base64url({ alg: "RS256", typ: "JWT" })}.${base64url({
     iss: email,
-    scope: "https://www.googleapis.com/auth/spreadsheets.readonly",
+    scope: "https://www.googleapis.com/auth/spreadsheets",
     aud: "https://oauth2.googleapis.com/token",
     exp: now + 3600,
     iat: now,
