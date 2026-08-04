@@ -45,18 +45,19 @@ async function fetchPriceByErpCode(): Promise<Map<string, number>> {
 }
 
 // 추정 매출액 = PLT수량 × 1PLT당 판매단가. 실제 쿠팡 정산액이 아닌 출고량 기반 추정치.
-export async function fetchEstimatedRevenueByMonth(): Promise<Map<number, number>> {
+// 키는 "YYYY-MM" — 월(month)만 쓰면 25년 4월과 26년 4월이 같은 키로 합쳐져 버린다(출고내역에 여러 연도 탭이 섞이는 순간부터 발생).
+export async function fetchEstimatedRevenueByMonth(): Promise<Map<string, number>> {
   const [priceByErp, { rows }] = await Promise.all([fetchPriceByErpCode(), fetchShipmentSource()]);
 
-  const revenueByMonth = new Map<number, number>();
+  const revenueByMonth = new Map<string, number>();
   for (const row of rows) {
     if (!row.erpCode || row.erpCode.startsWith("#")) continue;
     const price = priceByErp.get(row.erpCode);
     if (price === undefined) continue; // 판매단가 미등록 — 마스터에 채워지는 대로 반영됨
 
-    const month = row.date.getMonth() + 1;
+    const key = `${row.date.getFullYear()}-${String(row.date.getMonth() + 1).padStart(2, "0")}`;
     const revenue = row.pltQty * price;
-    revenueByMonth.set(month, (revenueByMonth.get(month) ?? 0) + revenue);
+    revenueByMonth.set(key, (revenueByMonth.get(key) ?? 0) + revenue);
   }
   return revenueByMonth;
 }

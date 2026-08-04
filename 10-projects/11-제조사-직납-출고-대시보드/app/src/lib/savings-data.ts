@@ -1,5 +1,6 @@
 import { fetchMonthlySavings } from "./savings-source";
 import { orderManufacturers, assignManufacturerColors } from "./manufacturer-color";
+import { monthLabelsFor, monthKeyOf } from "./month-label";
 import type { ResolvedPeriod } from "./period";
 
 // 절감비율 목표 — 2026-07부터 1.6% → 1.3%로 변경(사용자 확정). 그 이전 달 조회 시엔 과거 목표(1.6%)를 그대로 적용.
@@ -9,6 +10,7 @@ function savingsRatioTargetFor(year: number, month: number): number {
 
 export interface SavingsDashboardData {
   months: string[];
+  monthKeys: string[]; // months와 같은 순서의 "YYYY-MM" — 다른 소스와 실제 연/월 기준으로 맞춰야 할 때 씀
   savingsRatioByMonth: number[];
   savingsRatioTargetByMonth: number[];
   savingsTotalByMonth: number[];
@@ -42,7 +44,8 @@ export async function fetchSavingsDashboardData(period: ResolvedPeriod): Promise
   });
 
   return {
-    months: recent.map((m) => `${m.month}월`),
+    months: monthLabelsFor(recent),
+    monthKeys: recent.map(monthKeyOf),
     savingsRatioByMonth: recent.map((m) => m.ratio),
     savingsRatioTargetByMonth: recent.map((m) => savingsRatioTargetFor(m.year, m.month)),
     savingsTotalByMonth: recent.map((m) => m.savingsTotal),
@@ -51,6 +54,6 @@ export async function fetchSavingsDashboardData(period: ResolvedPeriod): Promise
     manufacturers,
     manufacturerColor,
     savingsByManufacturerMonth,
-    manufacturerMonths: manuRecent.map((m) => `${m.month}월`),
+    manufacturerMonths: monthLabelsFor(manuRecent),
   };
 }

@@ -1,8 +1,10 @@
 import { fetchMilkrunMonthly } from "./milkrun-source";
+import { monthLabelsFor, monthKeyOf } from "./month-label";
 import type { ResolvedPeriod } from "./period";
 
 export interface MilkrunDashboardData {
   months: string[];
+  monthKeys: string[]; // months와 같은 순서의 "YYYY-MM" — 다른 소스와 실제 연/월 기준으로 맞춰야 할 때 씀
   rocketRevenueByMonth: number[];
   rocketMilkrunCostByMonth: number[];
   rocketRatioByMonth: number[];
@@ -22,7 +24,8 @@ export async function fetchMilkrunDashboardData(period: ResolvedPeriod): Promise
   const recent = pool.slice(-period.months);
 
   return {
-    months: recent.map((m) => `${m.month}월`),
+    months: monthLabelsFor(recent),
+    monthKeys: recent.map(monthKeyOf),
     rocketRevenueByMonth: recent.map((m) => m.rocketRevenue),
     rocketMilkrunCostByMonth: recent.map((m) => m.rocketMilkrunCost),
     rocketRatioByMonth: recent.map((m) => m.rocketRatio),

@@ -44,6 +44,7 @@ export default async function OverviewPage({
   ]);
 
   const headlineMonthLabels = shipment.months.slice(-headlineMonths);
+  const headlineMonthKeys = shipment.monthKeys.slice(-headlineMonths);
   const rangeLabel =
     headlineMonthLabels.length <= 1 ? (headlineMonthLabels[0] ?? "당월") : `${headlineMonthLabels[0]} ~ ${headlineMonthLabels.at(-1)}`;
   const momLabel = headlineMonths === 1 ? "전월대비" : "직전 동기간 대비";
@@ -72,8 +73,8 @@ export default async function OverviewPage({
   // 목표는 기간 중 바뀔 수 있어(2026-07 1.6%→1.3%) 최신 달 기준(현재 적용 중인 목표)으로 비교한다
   const currentTarget = savings.savingsRatioTargetByMonth.at(-1) ?? 1.6;
 
-  const estimatedRevenueForPeriod = headlineMonthLabels.reduce(
-    (sum, label) => sum + (estimatedRevenueByMonth.get(Number.parseInt(label, 10)) ?? 0),
+  const estimatedRevenueForPeriod = headlineMonthKeys.reduce(
+    (sum, key) => sum + (estimatedRevenueByMonth.get(key) ?? 0),
     0
   );
 

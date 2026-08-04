@@ -1,5 +1,6 @@
 import { fetchShipmentSource } from "./shipment-source";
 import { orderManufacturers, assignManufacturerColors } from "./manufacturer-color";
+import { monthLabelsFor } from "./month-label";
 import type { ResolvedPeriod } from "./period";
 
 export interface MoverItem {
@@ -18,6 +19,7 @@ export interface CrossRow {
 export interface ShipmentDashboardData {
   manufacturers: string[];
   months: string[];
+  monthKeys: string[]; // months와 같은 순서의 "YYYY-MM"
   shipmentByMonth: Record<string, number[]>;
   totalShipmentThisMonth: number;
   totalShipmentLastMonth: number;
@@ -36,6 +38,7 @@ function emptyResult(excludedRowCount: number): ShipmentDashboardData {
   return {
     manufacturers: [],
     months: [],
+    monthKeys: [],
     shipmentByMonth: {},
     totalShipmentThisMonth: 0,
     totalShipmentLastMonth: 0,
@@ -75,7 +78,7 @@ export async function fetchShipmentDashboardData(period: ResolvedPeriod): Promis
     { length: monthsWindow },
     (_, i) => new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth() - (monthsWindow - 1 - i), 1)
   );
-  const months = monthStarts.map((d) => `${d.getMonth() + 1}월`);
+  const months = monthLabelsFor(monthStarts.map((d) => ({ year: d.getFullYear(), month: d.getMonth() + 1 })));
   const monthKeys = monthStarts.map(monthKey);
 
   const manufacturers = orderManufacturers(rows.map((r) => r.manufacturer));
@@ -126,6 +129,7 @@ export async function fetchShipmentDashboardData(period: ResolvedPeriod): Promis
   return {
     manufacturers,
     months,
+    monthKeys,
     shipmentByMonth,
     totalShipmentThisMonth,
     totalShipmentLastMonth,

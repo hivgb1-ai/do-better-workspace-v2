@@ -10,6 +10,7 @@ import { PeriodFilter } from "@/components/dashboard/period-filter";
 import { fetchSavingsDashboardData } from "@/lib/savings-data";
 import { fetchMilkrunDashboardData } from "@/lib/milkrun-data";
 import { resolvePeriod, type PeriodSearchParams } from "@/lib/period";
+import { monthLabelsFor } from "@/lib/month-label";
 
 export const revalidate = 0;
 
@@ -50,7 +51,20 @@ export default async function MonthlyReportPage({
   });
   const milkrunShareByMonth = directShareByMonth.map((share) => 100 - share);
 
-  const totalSavingsByMonth = savings.savingsTotalByMonth.map((direct, i) => direct + (milkrun.milkrunSavingsByMonth[i] ?? 0));
+  // 직납 절감액(구글시트 "직납 매출조정" 기준)과 밀크런 절감액(로컬 엑셀 기준)은 소스가 달라 실제로 채워진 기간이
+  // 서로 다를 수 있다 — 배열 순서(index)만 믿고 더하면 서로 다른 달의 값이 섞이므로, 실제 연/월(key)로 맞춘다.
+  const totalMonthKeys = [...new Set([...savings.monthKeys, ...milkrun.monthKeys])].sort();
+  const totalMonths = monthLabelsFor(
+    totalMonthKeys.map((k) => {
+      const [year, month] = k.split("-").map(Number);
+      return { year, month };
+    })
+  );
+  const savingsTotalByKey = new Map(savings.monthKeys.map((k, i) => [k, savings.savingsTotalByMonth[i]]));
+  const milkrunSavingsByKey = new Map(milkrun.monthKeys.map((k, i) => [k, milkrun.milkrunSavingsByMonth[i]]));
+  const totalDirectSavings = totalMonthKeys.map((k) => savingsTotalByKey.get(k) ?? 0);
+  const totalMilkrunSavings = totalMonthKeys.map((k) => milkrunSavingsByKey.get(k) ?? 0);
+  const totalSavingsByMonth = totalDirectSavings.map((d, i) => d + totalMilkrunSavings[i]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -180,16 +194,12 @@ export default async function MonthlyReportPage({
           <CardTitle className="text-sm">TOTAL 절감액 (직납 + 밀크런/쉽먼트 이원화)</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <TotalSavingsChart
-            months={savings.months}
-            directSavings={savings.savingsTotalByMonth}
-            milkrunSavings={milkrun.milkrunSavingsByMonth}
-          />
+          <TotalSavingsChart months={totalMonths} directSavings={totalDirectSavings} milkrunSavings={totalMilkrunSavings} />
           <MonthlyDataTable
-            months={savings.months}
+            months={totalMonths}
             rows={[
-              { label: "직납 절감액", values: savings.savingsTotalByMonth, unit: "won" },
-              { label: "밀크런 절감액", values: milkrun.milkrunSavingsByMonth, unit: "won" },
+              { label: "직납 절감액", values: totalDirectSavings, unit: "won" },
+              { label: "밀크런 절감액", values: totalMilkrunSavings, unit: "won" },
               { label: "TTL", values: totalSavingsByMonth, unit: "won" },
             ]}
           />
