@@ -19,6 +19,7 @@ const PRESETS: Record<string, { months: number; monthOffset: number; headlineMon
   today: { months: 1, monthOffset: 0, headlineMonths: 1 },
   "3m": { months: 3, monthOffset: 0, headlineMonths: 3 },
   "6m": { months: 6, monthOffset: 0, headlineMonths: 6 },
+  "1y": { months: 12, monthOffset: 0, headlineMonths: 12 },
 };
 
 const MAX_CUSTOM_MONTHS = 24;

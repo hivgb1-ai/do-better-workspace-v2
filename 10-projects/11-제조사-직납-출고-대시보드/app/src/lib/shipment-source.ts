@@ -2,8 +2,9 @@ import { cache } from "react";
 import { getGoogleSheetsAccessToken } from "./google-sheets";
 
 // 시트가 연도별로 분리된 탭으로 운영된다 (예: "26년 음료 제조사 직납 출고내역").
-// "25년 음료 제조사 직납 출고내역"은 더 이상 사용하지 않는 탭 — 새 연도가 시작되면 이 목록에 탭을 추가한다.
+// 새 연도가 시작되면 이 목록에 탭을 추가한다. 여기 없는 연도는 1년 조회(1y) 등에서 데이터가 비어 보인다.
 const SHEET_TABS: { name: string; year: number }[] = [
+  { name: "25년 음료 제조사 직납 출고내역", year: 2025 },
   { name: "26년 음료 제조사 직납 출고내역", year: 2026 },
 ];
 
