@@ -38,7 +38,7 @@ export function MonthlyDataTable({ months, rows, rightGutter }: MonthlyDataTable
         <TableRow>
           <TableHead>구분</TableHead>
           {months.map((m) => (
-            <TableHead key={m} className="overflow-hidden text-right text-ellipsis">
+            <TableHead key={m} className="overflow-hidden text-center text-ellipsis">
               {m}
             </TableHead>
           ))}
@@ -50,7 +50,7 @@ export function MonthlyDataTable({ months, rows, rightGutter }: MonthlyDataTable
           <TableRow key={row.label}>
             <TableCell className="overflow-hidden text-ellipsis text-muted-foreground">{row.label}</TableCell>
             {row.values.map((v, i) => (
-              <TableCell key={i} className="overflow-hidden text-right text-ellipsis tabular-nums">
+              <TableCell key={i} className="overflow-hidden text-center text-ellipsis tabular-nums">
                 {formatValue(v, row.unit)}
               </TableCell>
             ))}
