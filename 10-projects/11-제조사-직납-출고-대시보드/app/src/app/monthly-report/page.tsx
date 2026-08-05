@@ -11,7 +11,7 @@ import { fetchSavingsDashboardData } from "@/lib/savings-data";
 import { fetchMilkrunDashboardData } from "@/lib/milkrun-data";
 import { resolvePeriod, type PeriodSearchParams } from "@/lib/period";
 import { monthLabelsFor } from "@/lib/month-label";
-import { TABLE_RIGHT_GUTTER } from "@/lib/chart-layout";
+import { TABLE_RIGHT_GUTTER, TABLE_RIGHT_GUTTER_SINGLE } from "@/lib/chart-layout";
 
 export const revalidate = 0;
 
@@ -94,6 +94,7 @@ export default async function MonthlyReportPage({
           />
           <MonthlyDataTable
             months={savings.months}
+            rightGutter={TABLE_RIGHT_GUTTER_SINGLE}
             rows={[
               { label: "직납", values: savings.directCostByMonth, unit: "won" },
               { label: "밀크런&쉽먼트", values: savings.milkrunCostByMonth, unit: "won" },
@@ -139,6 +140,7 @@ export default async function MonthlyReportPage({
           />
           <MonthlyDataTable
             months={savings.manufacturerMonths}
+            rightGutter={TABLE_RIGHT_GUTTER_SINGLE}
             rows={savings.manufacturers.map((mfr) => ({
               label: mfr,
               values: savings.savingsByManufacturerMonth[mfr],
@@ -201,6 +203,7 @@ export default async function MonthlyReportPage({
           <TotalSavingsChart months={totalMonths} directSavings={totalDirectSavings} milkrunSavings={totalMilkrunSavings} />
           <MonthlyDataTable
             months={totalMonths}
+            rightGutter={TABLE_RIGHT_GUTTER_SINGLE}
             rows={[
               { label: "직납 절감액", values: totalDirectSavings, unit: "won" },
               { label: "밀크런 절감액", values: totalMilkrunSavings, unit: "won" },

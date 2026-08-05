@@ -49,7 +49,7 @@ export function SavingsByManufacturerChart({
         />
         <Tooltip
           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
-          formatter={(value) => (typeof value === "number" ? `${value.toLocaleString()}원` : value)}
+          formatter={(value) => (typeof value === "number" ? `${Math.round(value / 1000).toLocaleString()}천원` : value)}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         {/* isAnimationActive=false: react-smooth (recharts' animation dep) never resolves

@@ -15,12 +15,14 @@ interface MonthlyDataTableProps {
   rightGutter?: number;
 }
 
+// 원 단위 그대로면 자릿수가 많아 읽기 부담스러워 천원 단위로 줄여 표시한다(퍼센트는 그대로).
 function formatValue(v: number, unit: MonthlyDataRow["unit"]) {
   if (unit === "percent") return `${v.toFixed(2)}%`;
-  return Math.round(v).toLocaleString();
+  return Math.round(v / 1000).toLocaleString();
 }
 
 export function MonthlyDataTable({ months, rows, rightGutter }: MonthlyDataTableProps) {
+  const hasWon = rows.some((r) => r.unit !== "percent");
   return (
     // table-layout: fixed + colgroup로 월 컬럼을 모두 같은 폭으로 강제 — 안 그러면 값의 자릿수(예: "795,520" vs
     // "1,375,506,374")에 따라 컬럼 폭이 제각각이라 위 차트의 막대 위치와 어긋나 보인다(달 수가 많을수록 더 심해짐).
@@ -36,7 +38,7 @@ export function MonthlyDataTable({ months, rows, rightGutter }: MonthlyDataTable
       </colgroup>
       <TableHeader>
         <TableRow>
-          <TableHead>구분</TableHead>
+          <TableHead>{hasWon ? "구분 (천원)" : "구분"}</TableHead>
           {months.map((m) => (
             <TableHead key={m} className="overflow-hidden text-center text-ellipsis">
               {m}

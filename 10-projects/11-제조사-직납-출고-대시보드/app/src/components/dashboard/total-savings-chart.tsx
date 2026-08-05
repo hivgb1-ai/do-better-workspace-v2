@@ -36,7 +36,7 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
           formatter={(value, name) => {
             if (typeof value !== "number") return [value, name];
-            return [`${Math.round(value).toLocaleString()}원`, name];
+            return [`${Math.round(value / 1000).toLocaleString()}천원`, name];
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -49,7 +49,7 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
           <LabelList
             dataKey="totalLabel"
             position="top"
-            formatter={(v) => (typeof v === "number" ? Math.round(v).toLocaleString() : "")}
+            formatter={(v) => (typeof v === "number" ? Math.round(v / 1000).toLocaleString() : "")}
             fontSize={12}
             fontWeight={600}
             fill="var(--foreground)"

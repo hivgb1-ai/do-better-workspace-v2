@@ -54,7 +54,7 @@ export function CostCompositionChart({ months, directCosts, milkrunCosts }: Cost
             if (typeof value !== "number") return [value, name];
             const shareKey = name === "직납" ? "directShare" : "milkrunShare";
             const share = (item.payload as { directShare: number; milkrunShare: number })[shareKey];
-            return [`${value.toLocaleString()}원 (${share.toFixed(1)}%)`, name];
+            return [`${Math.round(value / 1000).toLocaleString()}천원 (${share.toFixed(1)}%)`, name];
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />

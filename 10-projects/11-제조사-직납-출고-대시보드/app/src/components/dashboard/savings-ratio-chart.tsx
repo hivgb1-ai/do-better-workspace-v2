@@ -63,7 +63,7 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, targets }: Sa
           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
           formatter={(value, name) => {
             if (typeof value !== "number") return [value, name];
-            return name === "절감액" ? [`${value.toLocaleString()}원`, name] : [`${value.toFixed(2)}%`, name];
+            return name === "절감액" ? [`${Math.round(value / 1000).toLocaleString()}천원`, name] : [`${value.toFixed(2)}%`, name];
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />

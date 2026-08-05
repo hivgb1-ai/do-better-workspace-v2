@@ -63,7 +63,7 @@ export function MilkrunChannelChart({ months, revenue, milkrunCost, ratio }: Mil
           contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
           formatter={(value, name) => {
             if (typeof value !== "number") return [value, name];
-            return name === "물류비율" ? [`${value.toFixed(2)}%`, name] : [`${value.toLocaleString()}원`, name];
+            return name === "물류비율" ? [`${value.toFixed(2)}%`, name] : [`${Math.round(value / 1000).toLocaleString()}천원`, name];
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />

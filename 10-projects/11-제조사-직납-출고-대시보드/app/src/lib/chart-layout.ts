@@ -10,3 +10,8 @@ export const TABLE_LABEL_COL_WIDTH = 156;
 export const RIGHT_AXIS_WIDTH = 48;
 export const RIGHT_AXIS_MARGIN = 12;
 export const TABLE_RIGHT_GUTTER = RIGHT_AXIS_WIDTH + RIGHT_AXIS_MARGIN;
+
+// 왼쪽 축만 있는 차트(TotalSavingsChart, CostCompositionChart, SavingsByManufacturerChart)도
+// margin.right(12)만큼은 플롯이 좁다 — 위 TABLE_RIGHT_GUTTER보다 작지만 이것도 표에 반영해야
+// 완전히 맞는다. 그 세 표에는 이 값을 rightGutter로 넘긴다.
+export const TABLE_RIGHT_GUTTER_SINGLE = RIGHT_AXIS_MARGIN;
