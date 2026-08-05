@@ -7,11 +7,15 @@ import { MilkrunChannelChart } from "@/components/dashboard/milkrun-channel-char
 import { TotalSavingsChart } from "@/components/dashboard/total-savings-chart";
 import { MonthlyDataTable } from "@/components/dashboard/monthly-data-table";
 import { PeriodFilter } from "@/components/dashboard/period-filter";
-import { fetchSavingsDashboardData } from "@/lib/savings-data";
-import { fetchMilkrunDashboardData } from "@/lib/milkrun-data";
 import { resolvePeriod, type PeriodSearchParams } from "@/lib/period";
-import { monthLabelsFor } from "@/lib/month-label";
 import { TABLE_RIGHT_GUTTER, TABLE_RIGHT_GUTTER_SINGLE } from "@/lib/chart-layout";
+import { buildMonthlyReport, type ReportCard } from "@/lib/monthly-report-cards";
+
+function cardById(cards: ReportCard[], id: string): ReportCard {
+  const card = cards.find((c) => c.id === id);
+  if (!card) throw new Error(`알 수 없는 카드 id: ${id}`);
+  return card;
+}
 
 export const revalidate = 0;
 
@@ -38,34 +42,10 @@ export default async function MonthlyReportPage({
   if (sp.to) exportQuery.set("to", sp.to);
   const exportHref = `/api/monthly-report/export?${exportQuery.toString()}`;
 
-  const [savings, milkrun] = await Promise.all([
-    fetchSavingsDashboardData(period),
-    fetchMilkrunDashboardData(period),
-  ]);
+  const { rangeLabel, savings, milkrun, cards } = await buildMonthlyReport(period);
 
-  const rangeLabel =
-    savings.months.length <= 1 ? (savings.months[0] ?? "당월") : `${savings.months[0]} ~ ${savings.months.at(-1)}`;
-
-  const directShareByMonth = savings.directCostByMonth.map((direct, i) => {
-    const total = direct + (savings.milkrunCostByMonth[i] ?? 0);
-    return total ? (direct / total) * 100 : 0;
-  });
-  const milkrunShareByMonth = directShareByMonth.map((share) => 100 - share);
-
-  // 직납 절감액(구글시트 "직납 매출조정" 기준)과 밀크런 절감액(로컬 엑셀 기준)은 소스가 달라 실제로 채워진 기간이
-  // 서로 다를 수 있다 — 배열 순서(index)만 믿고 더하면 서로 다른 달의 값이 섞이므로, 실제 연/월(key)로 맞춘다.
-  const totalMonthKeys = [...new Set([...savings.monthKeys, ...milkrun.monthKeys])].sort();
-  const totalMonths = monthLabelsFor(
-    totalMonthKeys.map((k) => {
-      const [year, month] = k.split("-").map(Number);
-      return { year, month };
-    })
-  );
-  const savingsTotalByKey = new Map(savings.monthKeys.map((k, i) => [k, savings.savingsTotalByMonth[i]]));
-  const milkrunSavingsByKey = new Map(milkrun.monthKeys.map((k, i) => [k, milkrun.milkrunSavingsByMonth[i]]));
-  const totalDirectSavings = totalMonthKeys.map((k) => savingsTotalByKey.get(k) ?? 0);
-  const totalMilkrunSavings = totalMonthKeys.map((k) => milkrunSavingsByKey.get(k) ?? 0);
-  const totalSavingsByMonth = totalDirectSavings.map((d, i) => d + totalMilkrunSavings[i]);
+  const totalCard = cardById(cards, "card-total-savings");
+  const [totalDirectSavings, totalMilkrunSavings] = totalCard.rows.map((r) => r.values);
 
   return (
     <div className="flex flex-col gap-6">
@@ -93,14 +73,9 @@ export default async function MonthlyReportPage({
             milkrunCosts={savings.milkrunCostByMonth}
           />
           <MonthlyDataTable
-            months={savings.months}
+            months={cardById(cards, "card-direct-ratio").months}
             rightGutter={TABLE_RIGHT_GUTTER_SINGLE}
-            rows={[
-              { label: "직납", values: savings.directCostByMonth, unit: "won" },
-              { label: "밀크런&쉽먼트", values: savings.milkrunCostByMonth, unit: "won" },
-              { label: "직납 비중", values: directShareByMonth, unit: "percent" },
-              { label: "밀크런&쉽먼트 비중", values: milkrunShareByMonth, unit: "percent" },
-            ]}
+            rows={cardById(cards, "card-direct-ratio").rows}
           />
         </CardContent>
       </Card>
@@ -117,12 +92,9 @@ export default async function MonthlyReportPage({
             targets={savings.savingsRatioTargetByMonth}
           />
           <MonthlyDataTable
-            months={savings.months}
+            months={cardById(cards, "card-savings-ratio").months}
             rightGutter={TABLE_RIGHT_GUTTER}
-            rows={[
-              { label: "절감액", values: savings.savingsTotalByMonth, unit: "won" },
-              { label: "절감비율", values: savings.savingsRatioByMonth, unit: "percent" },
-            ]}
+            rows={cardById(cards, "card-savings-ratio").rows}
           />
         </CardContent>
       </Card>
@@ -139,13 +111,9 @@ export default async function MonthlyReportPage({
             manufacturerColor={savings.manufacturerColor}
           />
           <MonthlyDataTable
-            months={savings.manufacturerMonths}
+            months={cardById(cards, "card-manufacturer-savings").months}
             rightGutter={TABLE_RIGHT_GUTTER_SINGLE}
-            rows={savings.manufacturers.map((mfr) => ({
-              label: mfr,
-              values: savings.savingsByManufacturerMonth[mfr],
-              unit: "won",
-            }))}
+            rows={cardById(cards, "card-manufacturer-savings").rows}
           />
         </CardContent>
       </Card>
@@ -162,13 +130,9 @@ export default async function MonthlyReportPage({
             ratio={milkrun.rocketRatioByMonth}
           />
           <MonthlyDataTable
-            months={milkrun.months}
+            months={cardById(cards, "card-rocket-milkrun").months}
             rightGutter={TABLE_RIGHT_GUTTER}
-            rows={[
-              { label: "총매출", values: milkrun.rocketRevenueByMonth, unit: "won" },
-              { label: "밀크런", values: milkrun.rocketMilkrunCostByMonth, unit: "won" },
-              { label: "물류비율", values: milkrun.rocketRatioByMonth, unit: "percent" },
-            ]}
+            rows={cardById(cards, "card-rocket-milkrun").rows}
           />
         </CardContent>
       </Card>
@@ -184,13 +148,9 @@ export default async function MonthlyReportPage({
             ratio={milkrun.freshRatioByMonth}
           />
           <MonthlyDataTable
-            months={milkrun.months}
+            months={cardById(cards, "card-fresh-milkrun").months}
             rightGutter={TABLE_RIGHT_GUTTER}
-            rows={[
-              { label: "총매출", values: milkrun.freshRevenueByMonth, unit: "won" },
-              { label: "밀크런", values: milkrun.freshMilkrunCostByMonth, unit: "won" },
-              { label: "물류비율", values: milkrun.freshRatioByMonth, unit: "percent" },
-            ]}
+            rows={cardById(cards, "card-fresh-milkrun").rows}
           />
         </CardContent>
       </Card>
@@ -200,15 +160,11 @@ export default async function MonthlyReportPage({
           <CardTitle className="text-sm">TOTAL 절감액 (직납 + 밀크런/쉽먼트 이원화)</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <TotalSavingsChart months={totalMonths} directSavings={totalDirectSavings} milkrunSavings={totalMilkrunSavings} />
+          <TotalSavingsChart months={totalCard.months} directSavings={totalDirectSavings} milkrunSavings={totalMilkrunSavings} />
           <MonthlyDataTable
-            months={totalMonths}
+            months={totalCard.months}
             rightGutter={TABLE_RIGHT_GUTTER_SINGLE}
-            rows={[
-              { label: "직납 절감액", values: totalDirectSavings, unit: "won" },
-              { label: "밀크런 절감액", values: totalMilkrunSavings, unit: "won" },
-              { label: "TTL", values: totalSavingsByMonth, unit: "won" },
-            ]}
+            rows={totalCard.rows}
           />
         </CardContent>
       </Card>
