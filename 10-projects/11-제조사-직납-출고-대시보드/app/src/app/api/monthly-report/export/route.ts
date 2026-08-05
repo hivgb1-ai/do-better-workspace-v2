@@ -50,10 +50,11 @@ const CHART_PLANS: Record<string, (card: ReportCard) => ChartPlanEntry[]> = {
   "card-total-savings": (c) => [{ type: "bar", title: c.title, rowIdxs: [0, 1], stacked: true, colors: [PALETTE.blue, PALETTE.aqua] }],
 };
 
-// 표시 단위: 금액(won)은 화면과 동일하게 천원, 비율(percent)은 엑셀 표준 퍼센트 서식(0~1 값 + "0.00%")
+// 표시 단위: 화면(대시보드)은 스캔하기 편하게 천원 단위로 줄이지만, 엑셀은 실제 기록·분석용이라
+// 원 단위 그대로 넣는다. 비율(percent)은 엑셀 표준 퍼센트 서식(0~1 값 + "0.00%").
 function cellValueAndFormat(row: ReportRow, v: number): { value: number; numFmt: string } {
   if (row.unit === "percent") return { value: v / 100, numFmt: "0.00%" };
-  return { value: Math.round(v / 1000), numFmt: "#,##0" };
+  return { value: Math.round(v), numFmt: "#,##0" };
 }
 
 function writeCardSheet(workbook: ExcelJS.Workbook, card: ReportCard): SheetChartSpec["charts"] {
