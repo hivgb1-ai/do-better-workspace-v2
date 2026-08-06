@@ -4,6 +4,7 @@ import {
   Bar,
   CartesianGrid,
   ComposedChart,
+  LabelList,
   Legend,
   Line,
   ResponsiveContainer,
@@ -37,7 +38,7 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, targets }: Sa
 
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <ComposedChart data={data} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+      <ComposedChart data={data} margin={{ top: 16, right: 12, left: 0, bottom: 0 }}>
         <CartesianGrid vertical={false} stroke="var(--border)" />
         <XAxis dataKey="month" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
         <YAxis
@@ -79,7 +80,19 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, targets }: Sa
           strokeWidth={2}
           dot={{ r: 4, fill: "var(--chart-4)", stroke: "var(--card)", strokeWidth: 1.5 }}
           isAnimationActive={false}
-        />
+        >
+          <LabelList
+            dataKey="ratio"
+            position="top"
+            formatter={(v) => (typeof v === "number" ? `${v.toFixed(2)}%` : "")}
+            fontSize={11}
+            fontWeight={700}
+            fill="var(--chart-4)"
+            stroke="var(--card)"
+            strokeWidth={3}
+            paintOrder="stroke"
+          />
+        </Line>
         <Line
           yAxisId="ratio"
           type="linear"
