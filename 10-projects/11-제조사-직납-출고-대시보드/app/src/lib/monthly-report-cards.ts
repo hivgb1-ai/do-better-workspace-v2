@@ -54,8 +54,12 @@ export async function buildMonthlyReport(period: ResolvedPeriod): Promise<Monthl
   );
   const savingsTotalByKey = new Map(savings.monthKeys.map((k, i) => [k, savings.savingsTotalByMonth[i]]));
   const milkrunSavingsByKey = new Map(milkrun.monthKeys.map((k, i) => [k, milkrun.milkrunSavingsByMonth[i]]));
+  const milkrunSavingsRatioByKey = new Map(
+    milkrun.monthKeys.map((k, i) => [k, milkrun.milkrunSavingsRatioByMonth[i]])
+  );
   const totalDirectSavings = totalMonthKeys.map((k) => savingsTotalByKey.get(k) ?? 0);
   const totalMilkrunSavings = totalMonthKeys.map((k) => milkrunSavingsByKey.get(k) ?? 0);
+  const totalMilkrunSavingsRatio = totalMonthKeys.map((k) => milkrunSavingsRatioByKey.get(k) ?? 0);
   const totalSavingsByMonth = totalDirectSavings.map((d, i) => d + totalMilkrunSavings[i]);
 
   const cards: ReportCard[] = [
@@ -123,6 +127,7 @@ export async function buildMonthlyReport(period: ResolvedPeriod): Promise<Monthl
         { label: "직납 절감액", values: totalDirectSavings, unit: "won" },
         { label: "밀크런 절감액", values: totalMilkrunSavings, unit: "won" },
         { label: "TTL", values: totalSavingsByMonth, unit: "won" },
+        { label: "밀크런 절감비율", values: totalMilkrunSavingsRatio, unit: "percent" },
       ],
     },
   ];

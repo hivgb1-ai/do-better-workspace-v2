@@ -12,6 +12,7 @@ export interface MilkrunDashboardData {
   freshMilkrunCostByMonth: number[];
   freshRatioByMonth: number[];
   milkrunSavingsByMonth: number[];
+  milkrunSavingsRatioByMonth: number[];
 }
 
 export async function fetchMilkrunDashboardData(period: ResolvedPeriod): Promise<MilkrunDashboardData> {
@@ -33,5 +34,6 @@ export async function fetchMilkrunDashboardData(period: ResolvedPeriod): Promise
     freshMilkrunCostByMonth: recent.map((m) => m.freshMilkrunCost),
     freshRatioByMonth: recent.map((m) => m.freshRatio),
     milkrunSavingsByMonth: recent.map((m) => m.milkrunSavings),
+    milkrunSavingsRatioByMonth: recent.map((m) => m.milkrunSavingsRatio),
   };
 }

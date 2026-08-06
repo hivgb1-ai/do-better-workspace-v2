@@ -18,6 +18,7 @@ export interface MilkrunMonthly {
   freshMilkrunCost: number;
   freshRatio: number; // %
   milkrunSavings: number; // 밀크런/쉽먼트 이원화로 절감된 금액(양수)
+  milkrunSavingsRatio: number; // ONLY 밀크런 가정 비용 대비 절감 비율(%)
 }
 
 function baseDir() {
@@ -114,6 +115,10 @@ export async function fetchMilkrunMonthly(): Promise<MilkrunMonthly[]> {
   if (savingsRow[1]?.trim() !== "절감액") {
     throw new Error(`${SHEET_NAME}: TTL 절감액 행 위치가 예상과 다릅니다 (구조 변경 확인 필요)`);
   }
+  const savingsRatioRow = rows[section2Start + 19]; // "TTL 절감율(%)" 행 — 엑셀에 이미 계산되어 있음
+  if (savingsRatioRow[1]?.trim() !== "절감율(%)") {
+    throw new Error(`${SHEET_NAME}: TTL 절감율(%) 행 위치가 예상과 다릅니다 (구조 변경 확인 필요)`);
+  }
 
   const result: MilkrunMonthly[] = [];
   yearBlocks.forEach(({ year, startCol }, i) => {
@@ -134,6 +139,7 @@ export async function fetchMilkrunMonthly(): Promise<MilkrunMonthly[]> {
         freshMilkrunCost: parseNum(freshMilkrunRow[col]) ?? 0,
         freshRatio: parsePercent(freshRatioRow[col]) ?? 0,
         milkrunSavings: Math.abs(parseNum(savingsRow[col]) ?? 0),
+        milkrunSavingsRatio: parsePercent(savingsRatioRow[col]) ?? 0,
       });
     }
   });
