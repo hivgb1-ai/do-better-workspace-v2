@@ -165,6 +165,7 @@ export default async function MonthlyReportPage({
             months={milkrun.months}
             savings={milkrun.milkrunSavingsByMonth}
             ratios={milkrun.milkrunSavingsRatioByMonth}
+            targets={milkrun.milkrunSavingsRatioTargetByMonth}
           />
           <MonthlyDataTable
             months={cardById(cards, "card-milkrun-savings").months}

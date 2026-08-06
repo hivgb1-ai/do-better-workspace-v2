@@ -7,19 +7,21 @@ interface MilkrunSavingsChartProps {
   months: string[];
   savings: number[];
   ratios: number[];
+  targets: number[];
 }
 
 function formatEok(value: number) {
   return `${(value / 100_000_000).toFixed(1)}억`;
 }
 
-export function MilkrunSavingsChart({ months, savings, ratios }: MilkrunSavingsChartProps) {
+export function MilkrunSavingsChart({ months, savings, ratios, targets }: MilkrunSavingsChartProps) {
   const data = months.map((month, i) => ({
     month,
     savings: savings[i] ?? 0,
     ratio: ratios[i] ?? 0,
+    target: targets[i],
   }));
-  const ratioMax = Math.ceil((Math.max(...ratios, 0) + 5) / 5) * 5;
+  const ratioMax = Math.ceil((Math.max(...ratios, ...targets, 0) + 5) / 5) * 5;
   const savingsMax = Math.max(...data.map((d) => d.savings), 0) * 1.2;
 
   return (
@@ -77,6 +79,17 @@ export function MilkrunSavingsChart({ months, savings, ratios }: MilkrunSavingsC
             paintOrder="stroke"
           />
         </Line>
+        <Line
+          yAxisId="ratio"
+          type="linear"
+          dataKey="target"
+          name="목표"
+          stroke="var(--critical)"
+          strokeWidth={1.5}
+          strokeDasharray="4 4"
+          dot={false}
+          isAnimationActive={false}
+        />
       </ComposedChart>
     </ResponsiveContainer>
   );
