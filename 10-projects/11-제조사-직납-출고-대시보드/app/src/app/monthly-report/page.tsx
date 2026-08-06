@@ -4,6 +4,7 @@ import { SavingsRatioChart } from "@/components/dashboard/savings-ratio-chart";
 import { CostCompositionChart } from "@/components/dashboard/cost-composition-chart";
 import { SavingsByManufacturerChart } from "@/components/dashboard/savings-by-manufacturer-chart";
 import { MilkrunChannelChart } from "@/components/dashboard/milkrun-channel-chart";
+import { MilkrunSavingsChart } from "@/components/dashboard/milkrun-savings-chart";
 import { TotalSavingsChart } from "@/components/dashboard/total-savings-chart";
 import { MonthlyDataTable } from "@/components/dashboard/monthly-data-table";
 import { PeriodFilter } from "@/components/dashboard/period-filter";
@@ -151,6 +152,24 @@ export default async function MonthlyReportPage({
             months={cardById(cards, "card-fresh-milkrun").months}
             rightGutter={TABLE_RIGHT_GUTTER}
             rows={cardById(cards, "card-fresh-milkrun").rows}
+          />
+        </CardContent>
+      </Card>
+
+      <Card id="card-milkrun-savings">
+        <CardHeader>
+          <CardTitle className="text-sm">밀크런/쉽먼트 이원화 비용절감 (ONLY 밀크런 대비)</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <MilkrunSavingsChart
+            months={milkrun.months}
+            savings={milkrun.milkrunSavingsByMonth}
+            ratios={milkrun.milkrunSavingsRatioByMonth}
+          />
+          <MonthlyDataTable
+            months={cardById(cards, "card-milkrun-savings").months}
+            rightGutter={TABLE_RIGHT_GUTTER}
+            rows={cardById(cards, "card-milkrun-savings").rows}
           />
         </CardContent>
       </Card>

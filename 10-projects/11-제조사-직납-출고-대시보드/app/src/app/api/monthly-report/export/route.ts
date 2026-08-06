@@ -47,6 +47,10 @@ const CHART_PLANS: Record<string, (card: ReportCard) => ChartPlanEntry[]> = {
     { type: "bar", title: `${c.sheet} - 총매출/밀크런`, rowIdxs: [0, 1], colors: [PALETTE.blue, PALETTE.aqua] },
     { type: "line", title: `${c.sheet} - 물류비율`, rowIdxs: [2], colors: [PALETTE.yellow] },
   ],
+  "card-milkrun-savings": (c) => [
+    { type: "bar", title: `${c.sheet} - 절감액`, rowIdxs: [0], colors: [PALETTE.blue] },
+    { type: "line", title: `${c.sheet} - 절감비율`, rowIdxs: [1], colors: [PALETTE.yellow] },
+  ],
   "card-total-savings": (c) => [{ type: "bar", title: c.title, rowIdxs: [0, 1], stacked: true, colors: [PALETTE.blue, PALETTE.aqua] }],
 };
 
