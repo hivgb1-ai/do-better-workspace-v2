@@ -1,0 +1,17 @@
+{
+  "name": "wms-api",
+  "version": "1.0.0",
+  "description": "OtooWMS(eglogis.otoowms.kr)에 매번 로그인해서 \"품목별 입고 리스트\"를 수동으로 다운로드하지 않고, 본인 계정으로 명령어 한 줄로 바로 데이터를 가져오는 도구입니다.",
+  "main": "fetch_inbound.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "exceljs": "^4.4.0",
+    "playwright-core": "^1.63.0"
+  }
+}
