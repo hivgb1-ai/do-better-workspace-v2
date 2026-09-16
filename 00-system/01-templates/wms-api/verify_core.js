@@ -104,7 +104,7 @@ function parseSubl(csv, qtyCol, expCol, targetMDs, vendorList) {
     const qty = rawQty === '' ? null : Math.round(parseFloat(rawQty.replace(/,/g, '')) || 0);
     out.push({
       date: md, erp: (cols[ERP_COL] || '').trim(), name: (cols[NAME_COL] || '').trim(),
-      qty, exp: (cols[expCol] || '').trim(),
+      qty, exp: (cols[expCol] || '').trim(), raw: cols,
     });
   }
   return out;
@@ -227,60 +227,158 @@ async function runVerification({ username, password, from, to, vendor, org, ambi
     details: { mismatch, notReceived, unplanned, blankScm, pending },
   };
 
-  const workbook = await buildWorkbook(summary);
-  const dateTag = from === to ? from.replace(/-/g, '') : `${from.replace(/-/g, '')}-${to.replace(/-/g, '')}`;
-  const fileName = `입고검증_${dateTag}.xlsx`;
+  const workbook = await buildWorkbook(summary, { sublRows, wmsRows });
+  const fileName = reportFileName(from, to);
 
   return { summary, workbook, fileName };
 }
 
-async function buildWorkbook(summary) {
+// 기존(구글 앱스크립트로 매일 자동 생성되던) 리포트와 같은 명명 규칙:
+// 하루면 YYYYMMDD, 기간이면 YYYYMMDD-MMDD (같은 달 기준. 달을 넘기면 뒤쪽도 전체 날짜로 표기).
+function reportFileName(from, to) {
+  const f = from.replace(/-/g, '');
+  if (from === to) return `${f}_이지로지스_입고검증C.xlsx`;
+  const sameMonth = from.slice(0, 7) === to.slice(0, 7);
+  const t = sameMonth ? to.slice(5, 7) + to.slice(8, 10) : to.replace(/-/g, '');
+  return `${f}-${t}_이지로지스_입고검증C.xlsx`;
+}
+
+// AI_프롬프트.md/사용법.md가 가리키는 정본 위치 — 매달 담당자가 만드는 YYYYMM 폴더 아래 저장.
+const REPORT_BASE_DIR = 'G:\\공유 드라이브\\HQ_Team_SCM\\4.물류운영팀\\SCM_Logistics_김명은\\0. Claude\\이지로지스_입고검증_자동화';
+
+function reportSavePath(from, fileName) {
+  const path = require('path');
+  const yyyymm = from.slice(0, 4) + from.slice(5, 7);
+  return path.join(REPORT_BASE_DIR, yyyymm, fileName);
+}
+
+// 엑셀 리포트 다운로드 버튼용 — 이미 만들어둔 workbook 버퍼를 그 자리에 그대로 저장.
+// 같은 날짜로 다시 실행하면 그날 파일을 덮어쓴다(기존 자동화도 동일 관례) — 단, 그 파일이
+// 엑셀에서 열려 있으면(잠금) 쓰기가 실패하니 그 경우 에러를 그대로 올려보낸다.
+async function saveReportToShareDrive(buffer, from, to) {
+  const fs = require('fs');
+  const path = require('path');
+  const fileName = reportFileName(from, to);
+  const fullPath = reportSavePath(from, fileName);
+  fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+  fs.writeFileSync(fullPath, buffer);
+  return fullPath;
+}
+
+async function buildWorkbook(summary, raw) {
   const wb = new ExcelJS.Workbook();
-
-  const wsSummary = wb.addWorksheet('요약');
-  wsSummary.columns = [{ width: 28 }, { width: 20 }];
-  wsSummary.addRows([
-    ['기간', summary.range], ['거래처', summary.vendor], ['화주', summary.org],
-    ['WMS 건수', summary.wmsRowsCount], ['타 화주 제외', summary.excludedByOrg],
-    ['수불시트 건수', summary.scmRowsCount],
-    ['수불시트 실입고 합계', summary.scmTotal], ['WMS 총입고(매출반품 제외)', summary.wmsTotalExRet],
-    ['차이(수불시트-WMS)', summary.diffTotal], ['잔여 미설명 차이', summary.residual],
-    ['매출반품(참고)', summary.retTotal],
-    ['완전일치 그룹', summary.counts.complete], ['전체 그룹', summary.counts.totalGroups],
-  ]);
-  wsSummary.getColumn(1).font = { bold: true };
-
-  const addSheet = (title, rows, cols) => {
-    const ws = wb.addWorksheet(title);
-    ws.columns = cols.map(c => ({ header: c.label, key: c.key, width: 18 }));
-    ws.getRow(1).font = { bold: true };
-    ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } };
-    rows.forEach(r => ws.addRow(r));
-    ws.views = [{ state: 'frozen', ySplit: 1 }];
-  };
-
-  addSheet('①수량불일치', summary.details.mismatch, [
-    { key: '날짜', label: '날짜' }, { key: '품목코드', label: '품목코드' }, { key: '상품명', label: '상품명' },
-    { key: 'WMS수량', label: 'WMS수량' }, { key: '재고수불수량', label: '수불시트수량' }, { key: '차이', label: '차이' },
-  ]);
-  addSheet('②미입고', summary.details.notReceived, [
-    { key: '날짜', label: '날짜' }, { key: '품목코드', label: '품목코드' }, { key: '상품명', label: '상품명' },
-    { key: '재고수불수량', label: '수불시트수량' },
-  ]);
-  addSheet('③비계획입고', summary.details.unplanned, [
-    { key: '날짜', label: '날짜' }, { key: '품목코드', label: '품목코드' }, { key: '상품명', label: '상품명' },
-    { key: 'WMS수량', label: 'WMS수량' }, { key: '거래처명', label: '거래처명' },
-  ]);
-  addSheet('④수불시트미기재', summary.details.blankScm, [
-    { key: '날짜', label: '날짜' }, { key: '품목코드', label: '품목코드' }, { key: '상품명', label: '상품명' },
-    { key: 'WMS수량', label: 'WMS수량' },
-  ]);
-  addSheet('⑤미확정', summary.details.pending, [
-    { key: '날짜', label: '날짜' }, { key: '품목코드', label: '품목코드' }, { key: '상품명', label: '상품명' },
-    { key: '거래처명', label: '거래처명' }, { key: '입고상태', label: '입고상태' }, { key: '요청수량', label: '요청수량' },
-  ]);
-
+  buildSummarySheet(wb, summary);
+  buildSublSheet(wb, raw.sublRows, summary);
+  buildWmsSheet(wb, raw.wmsRows);
   return wb;
 }
 
-module.exports = { runVerification, AMBIENT_GID_MAP, FROZEN_GID, SHEET_DOC_ID };
+function buildSummarySheet(wb, summary) {
+  const ws = wb.addWorksheet('요약');
+  ws.columns = [{ width: 32 }, { width: 14 }, { width: 14 }, { width: 12 }, { width: 12 },
+    { width: 10 }, { width: 14 }, { width: 14 }, { width: 10 }, { width: 20 }];
+  ws.addRow([`입고내역 검증 요약 — ${summary.range} ${summary.vendor}`]).font = { bold: true, size: 13 };
+  ws.addRow([]);
+
+  const bold = (row) => { row.font = { bold: true }; };
+  bold(ws.addRow(['총계 대사', null, null, null, '예외 상세 (직렬 — 한 줄에 한 건)']));
+  ws.addRow(['재고수불 실입고수량 합계 (수불시트)', summary.scmTotal, null, null,
+    '유형', '날짜', '품목코드', '상품명', '수불시트수량', 'WMS수량', '차이', '거래처명']).font = { bold: false };
+  ws.getRow(4).getCell(5).font = { bold: true };
+  ws.getRow(4).getCell(6).font = { bold: true };
+  ws.addRow(['WMS 총입고수량 (매출반품 제외)', summary.wmsTotalExRet]);
+  ws.addRow(['차이 (수불시트 − WMS)', summary.diffTotal]);
+  ws.addRow([]);
+  bold(ws.addRow(['차이 분해 (예외 유형별)']));
+  ws.addRow(['└ 냉동/상온 수불시트 미기재 (실입고수량 공란)', summary.details.blankScm.length]);
+  ws.addRow(['└ WMS 비계획입고 (재고수불 시트 미기재)', summary.details.unplanned.length]);
+  ws.addRow(['└ 미입고', summary.details.notReceived.length]);
+  ws.addRow(['└ 수불시트_WMS 수량불일치', summary.details.mismatch.length]);
+  ws.addRow(['미확정 (대기중, 실입고 0건 — 총계엔 영향 없음, 참고용)', summary.details.pending.length]);
+  ws.addRow(['매출반품 (제외 대상, 참고)', summary.retTotal]);
+  ws.addRow([]);
+  bold(ws.addRow(['검증 결과']));
+  ws.addRow(['잔여 미설명 차이 (0이어야 정상)', summary.residual]);
+  const abnormalCount = summary.details.mismatch.length + summary.details.notReceived.length +
+    summary.details.unplanned.length + summary.details.blankScm.length;
+  ws.addRow(['불일치 건수 (품목코드+날짜 기준)', abnormalCount]);
+  ws.addRow(['완전일치 그룹 수', summary.counts.complete]);
+  ws.addRow(['전체 대사 그룹 수 (품목코드+날짜)', summary.counts.totalGroups]);
+
+  // 예외 상세 — 4종류를 한 표로 직렬 나열 (컬럼 E부터)
+  let r = 4;
+  const put = (row, type, d) => {
+    ws.getRow(row).getCell(5).value = type;
+    ws.getRow(row).getCell(6).value = d.날짜 ?? '';
+    ws.getRow(row).getCell(7).value = d.품목코드 ?? '';
+    ws.getRow(row).getCell(8).value = d.상품명 ?? '';
+    ws.getRow(row).getCell(9).value = d.재고수불수량 ?? (d.수불시트수량 ?? '');
+    ws.getRow(row).getCell(10).value = d.WMS수량 ?? '';
+    ws.getRow(row).getCell(11).value = d.차이 ?? '';
+    ws.getRow(row).getCell(12).value = d.거래처명 ?? '';
+  };
+  summary.details.mismatch.forEach(d => { r++; put(r, '수량불일치', d); });
+  summary.details.notReceived.forEach(d => { r++; put(r, '미입고', d); });
+  summary.details.unplanned.forEach(d => { r++; put(r, 'WMS비계획입고', d); });
+  summary.details.blankScm.forEach(d => { r++; put(r, '수불시트미기재(공란)', { ...d, 재고수불수량: '(공란)' }); });
+}
+
+function buildSublSheet(wb, sublRows, summary) {
+  const ws = wb.addWorksheet('재고수불시트');
+  const header = [
+    '작성자', '수불유형', '입고날짜', '요일', '보내는창고', 'WMS\n거래처코드\n(보내는 창고)',
+    'ERP\n창고코드\n(보내는 창고)', '받는창고', 'ERP\n거래처코드\n(받는 창고)', 'ERP 코드', '상품명',
+    '상/저온', '입수량', '단위', '요청\n수량', 'BOX\n수량', 'PLT\n요청수량', '소비기한', '참고사항',
+    'PLT입수량', '실입고 수량', '배차요청\n', 'ERP 매입', '입고예정\n등록', '입고확인\nSNOP',
+    '출고확인\nLogistics', '입고확인\nLogistics', 'ERP처리', '바코드(한성 한정)',
+  ];
+  ws.addRow(header).font = { bold: true };
+  ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } };
+  sublRows.forEach(r => ws.addRow(r.raw));
+  ws.getColumn(11).width = 40;
+
+  // 오른쪽 피벗: 품목코드별 수불시트 행수 + (참고용) 수불시트 실입고 합계
+  const pivotCol = header.length + 2; // 빈 열 하나 띄우고
+  const wsRow1 = ws.getRow(1);
+  wsRow1.getCell(pivotCol).value = '품목코드';
+  wsRow1.getCell(pivotCol + 1).value = '품목명';
+  wsRow1.getCell(pivotCol + 2).value = '합계 : 실입고수량(수불시트)';
+  wsRow1.getCell(pivotCol + 3).value = '수불행수(COUNTIF)';
+  const byErp = new Map();
+  sublRows.forEach(r => {
+    const g = byErp.get(r.erp) || { name: r.name, qty: 0, count: 0 };
+    if (r.qty) g.qty += r.qty;
+    g.count++;
+    if (r.name) g.name = r.name;
+    byErp.set(r.erp, g);
+  });
+  let pr = 1;
+  byErp.forEach((g, erp) => {
+    pr++;
+    ws.getRow(pr).getCell(pivotCol).value = erp;
+    ws.getRow(pr).getCell(pivotCol + 1).value = g.name;
+    ws.getRow(pr).getCell(pivotCol + 2).value = g.qty;
+    ws.getRow(pr).getCell(pivotCol + 3).value = g.count;
+  });
+  ws.views = [{ state: 'frozen', ySplit: 1 }];
+}
+
+function buildWmsSheet(wb, wmsRows) {
+  const ws = wb.addWorksheet('WMS 입고현황');
+  const header = [
+    '입고번호', '입고요청일자', '입고일자', '입고상태', '입고유형', '창고코드', '창고명', '거래처코드',
+    '거래처명', '품목코드', '품목명', '단위', 'PLT입수량', 'BOX입수량', '입고수량', '입고PLT', '입고BOX',
+    '입고EA', '소비기한', 'LOT', '입고일자로트', '단가', '품목대분류', '품목중분류', '비고', '요청수량',
+  ];
+  ws.addRow(header).font = { bold: true };
+  ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } };
+  wmsRows.forEach(r => ws.addRow([
+    r.입고번호, r.입고요청일자, r.입고일자, r.입고상태, r.입고유형, r.창고코드, r.창고명, r.거래처코드,
+    r.거래처명, r.품목코드, r.품목명, r.단위, r.PLT입수량, r.BOX입수량, r.입고수량, r.입고PLT, r.입고BOX,
+    r.입고EA, r.소비기한, r.LOT, r.입고일자로트, r.단가, r.품목대분류, r.품목중분류, r.비고, r.입고수량,
+  ]));
+  ws.getColumn(11).width = 40;
+  ws.views = [{ state: 'frozen', ySplit: 1 }];
+}
+
+module.exports = { runVerification, saveReportToShareDrive, reportFileName, reportSavePath, AMBIENT_GID_MAP, FROZEN_GID, SHEET_DOC_ID };

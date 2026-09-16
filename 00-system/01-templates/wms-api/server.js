@@ -19,8 +19,9 @@ const { buildWorkbook } = require('./stock_mapping.js');
 // verify_core.js가 이 폴더에 없어도(원본 위치 미확인, 2026-09-14) 서버 전체가 죽지 않도록 방어적으로 로드.
 // /ipgo/verify 라우트만 영향받고, 컬리발주웹/발주서검증도구 등 나머지 라우트는 정상 동작.
 let runVerification = null;
+let saveReportToShareDrive = null;
 try {
-  ({ runVerification } = require('./verify_core.js'));
+  ({ runVerification, saveReportToShareDrive } = require('./verify_core.js'));
 } catch (e) {
   console.error('[경고] verify_core.js를 찾을 수 없어 /ipgo/verify 라우트는 비활성화됩니다:', e.message);
 }
@@ -441,6 +442,41 @@ async function handleIpgoVerify(req, res) {
   }
 }
 
+// /ipgo/save-report 라우트: 이지로지스_입고검증_웹.html의 "엑셀 리포트 다운로드" 버튼용 —
+// /ipgo/verify가 이미 만들어둔 workbook을 브라우저로 내려주는 대신, 예전에 구글 앱스크립트가
+// 매일 자동으로 저장하던 것과 같은 위치/명명 규칙(G:드라이브 .../이지로지스_입고검증_자동화/
+// YYYYMM/YYYYMMDD_이지로지스_입고검증C.xlsx)으로 이 서버가 직접 저장한다. 같은 날짜로 다시
+// 실행하면 그 파일을 덮어쓴다 — 단, 그 파일이 엑셀에서 열려 있으면 쓰기가 실패하니 그대로
+// 에러를 돌려준다(호출 쪽에서 "엑셀 닫고 다시 시도" 안내).
+async function handleIpgoSaveReport(req, res) {
+  if (!saveReportToShareDrive) {
+    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ ok: false, error: 'verify_core.js를 찾지 못해 리포트 저장을 쓸 수 없습니다.' }));
+    return;
+  }
+  try {
+    const bodyText = await readBody(req);
+    let body;
+    try { body = JSON.parse(bodyText); } catch { body = null; }
+    const fileBase64 = body && body.fileBase64;
+    const from = body && body.from;
+    const to = body && body.to;
+    if (!fileBase64 || !from || !to) {
+      res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: false, error: 'fileBase64/from/to가 모두 필요합니다.' }));
+      return;
+    }
+    const savedPath = await saveReportToShareDrive(Buffer.from(fileBase64, 'base64'), from, to);
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ ok: true, savedPath }));
+    console.log(`[${new Date().toISOString()}] /ipgo/save-report 응답 완료: ${savedPath}`);
+  } catch (e) {
+    console.error('에러:', e.message);
+    res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ ok: false, error: e.message }));
+  }
+}
+
 // /order-verify/save 라우트: 발주서검증도구_웹.html의 "검증완료 엑셀 다운로드" 버튼용 —
 // G:드라이브 발주서/오프라인/{거래처명}/ 안에서 납품예정월(dueDateISO)과 일치하는 폴더를 찾아 그 안에
 // 파일로 저장한다. 거래처마다 월 폴더 명명 규칙이 달라(예: 바디체리쉬는 "{거래처}_발주서_YY.MM",
@@ -611,6 +647,7 @@ const server = http.createServer((req, res) => {
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
   if (req.method === 'GET' && req.url === '/stock.xlsx') { handleStock(res); return; }
   if (req.method === 'POST' && req.url === '/ipgo/verify') { handleIpgoVerify(req, res); return; }
+  if (req.method === 'POST' && req.url === '/ipgo/save-report') { handleIpgoSaveReport(req, res); return; }
   if (req.method === 'POST' && req.url === '/order-verify/save') { handleOrderVerifySave(req, res); return; }
   if (req.method === 'POST' && req.url === '/order-verify/wms-check') { handleOrderVerifyWmsCheck(req, res); return; }
   if (req.method === 'POST' && req.url === '/order-verify/wms-upload') { handleOrderVerifyWmsUpload(req, res); return; }
