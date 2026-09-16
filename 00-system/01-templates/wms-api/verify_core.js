@@ -13,17 +13,22 @@
 // 템플릿 경로의 실제 배포 사본(각자 PC에 복사해 쓰는 원본)이라, 로직을 고칠 땐 여기와 템플릿
 // 양쪽에 같이 반영해야 한다.
 //
-// [실측 필요 — 아직 라이브로 검증 안 됨, 처음 실행 결과를 보고 맞는지 확인할 것]
+// 2026-09-16 (3차): 9/15 실측에서 15건이 전부 "WMS비계획입고"로 오탐되는 버그 발견 — 원인은
+// AMBIENT_GID_MAP['2026-09']를 7월 gid(1070227469)로 잘못 넣어둔 것. 실제 9월 상온 수불시트는
+// 별도 탭(gid=293073366, 사용자가 URL로 직접 확인해줌)이었다. 이 gid로 9/15 데이터를 직접
+// 대조해서 15건 전부 정확히 일치함을 확인 후 수정. 이 참에 VENDOR_COL도 실측 CSV로 검증해서
+// "받는창고" 열은 index 8이 아니라 7이고(8은 그 창고의 ERP거래처코드), 텍스트로 바로 매칭됨을
+// 확인 — 코드('1000') 우회 매칭 없이 이름 그대로 비교하도록 정리.
+//
+// [실측 필요 — 아직 확인 안 됨]
 //   1) 화주(org) 필터: AI_프롬프트.md가 "이 WMS 계정은 다화주 공유 계정이라 필터링 필수"라고
 //      명시하므로 실존하는 필드는 맞다 — 다만 WMS 입고현황 API(getSearch.do TABIDX=2) 응답의
 //      정확한 필드명은 이 PC에 저장된 샘플이 없어 확인 못 했다. r._raw에서 ORGNM/ORGNML/ORGNAME
 //      순으로 찾아보고, 못 찾으면 필터링 없이 통과시키며 콘솔에 경고를 남긴다 — "타 화주 제외"
 //      배지가 항상 0이면 이 경고가 떴는지 서버 콘솔을 확인할 것(0이면 필터가 안 걸리고 있다는 뜻).
-//   2) 거래처(vendor) 매칭: 수불시트의 "받는창고" 열(구버전 코드 기준 9번째 열, index 8)이
-//      실제로 창고 이름 텍스트인지 코드인지 verify.js 기준으로도 불명확했다(구버전은 '1000'
-//      코드를 "이지로지스"로 하드코딩). 이름 텍스트 매칭을 기본으로 하되 알려진 코드('1000')도
-//      같이 허용한다. 기본값의 두 번째 거래처("이지로지스 불용창고")는 알려진 코드가 없어
-//      텍스트 매칭만 되므로, 첫 실행에서 "수불시트 0건"이 뜨면 이 열의 실제 표기를 확인해야 한다.
+//   2) AMBIENT_GID_MAP의 2026-07/08 값: verify.js 주석(2026-07-08 변경 이력)을 그대로 가져온
+//      것으로, 9월처럼 매달 새 탭이 파였다면 8월도 실제로는 다른 gid일 수 있다 — 9월만 실측
+//      검증됨. 과거 날짜로 검증 시 이상하게 전부 "비계획입고"로 뜨면 이 맵부터 의심할 것.
 
 const { WmsSession } = require('./wms_client.js');
 const ExcelJS = require('exceljs');
@@ -34,14 +39,13 @@ const FROZEN_GID = '612298986'; // 냉동 수불 (verify.js 기준, 변경 이�
 // 새 달이 되어 시트 담당자가 새 탭을 파면 여기에 한 줄 추가할 것 — 없는 달은 조회 자체를 막는다
 // (예전 gid로 조용히 잘못된 달을 조회하는 것보다, 막고 알려주는 쪽이 안전함).
 const AMBIENT_GID_MAP = {
-  '2026-07': '1070227469',
-  '2026-08': '1070227469',
-  '2026-09': '1070227469',
+  '2026-07': '1070227469', // 미실측 (verify.js 이력 인용)
+  '2026-08': '1070227469', // 미실측 (verify.js 이력 인용) — 9월처럼 별도 탭이었을 수 있음
+  '2026-09': '293073366',  // 실측 완료 (9/15, 15건 전량 일치 확인)
 };
 const WARM_QTY_COL = 20, WARM_EXP_COL = 17;
 const FROZEN_QTY_COL = 17, FROZEN_EXP_COL = 18;
-const VENDOR_COL = 8, TYPE_COL = 1, DATE_COL = 2, ERP_COL = 9, NAME_COL = 10;
-const VENDOR_CODE_MAP = { '이지로지스': '1000' };
+const VENDOR_COL = 7, TYPE_COL = 1, DATE_COL = 2, ERP_COL = 9, NAME_COL = 10; // VENDOR_COL=7(받는창고 이름). 8은 그 창고의 ERP거래처코드라 다른 값.
 const DEFAULT_VENDORS = ['이지로지스', '이지로지스 불용창고'];
 
 function ambientGidFor(isoDate) {
@@ -92,7 +96,7 @@ function parseSubl(csv, qtyCol, expCol, targetMDs, vendorList) {
     const md = cols[DATE_COL]?.trim();
     if (!targetMDs.includes(md)) continue;
     const vendorCell = cols[VENDOR_COL]?.trim();
-    const matched = vendorList.some(v => vendorCell === v || vendorCell === VENDOR_CODE_MAP[v]);
+    const matched = vendorList.includes(vendorCell);
     if (!matched) continue;
     const tp = cols[TYPE_COL]?.trim();
     if (!['매입', '이동'].includes(tp)) continue;
