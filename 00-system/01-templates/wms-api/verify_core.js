@@ -273,54 +273,124 @@ async function buildWorkbook(summary, raw) {
   return wb;
 }
 
+const COLOR = {
+  navy: 'FF1F4E78', midBlue: 'FFBDD7EE', lightBlue: 'FFDCE6F2',
+  gray: 'FFD9D9D9', ok: 'FF1A7F37', bad: 'FFC00000',
+};
+const NUMFMT = '#,##0';
+
+function fillCell(cell, argb) { cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb } }; }
+function signColor(n) { return typeof n === 'number' && n < 0 ? COLOR.bad : (typeof n === 'number' && n > 0 ? COLOR.ok : null); }
+
 function buildSummarySheet(wb, summary) {
   const ws = wb.addWorksheet('요약');
-  ws.columns = [{ width: 32 }, { width: 14 }, { width: 14 }, { width: 12 }, { width: 12 },
-    { width: 10 }, { width: 14 }, { width: 14 }, { width: 10 }, { width: 20 }];
-  ws.addRow([`입고내역 검증 요약 — ${summary.range} ${summary.vendor}`]).font = { bold: true, size: 13 };
+  ws.columns = [
+    { width: 34 }, { width: 14 }, { width: 2 }, { width: 2 },
+    { width: 10 }, { width: 16 }, { width: 42 }, { width: 12 }, { width: 12 }, { width: 10 }, { width: 22 },
+  ];
+
+  // 제목 배너 (전체 폭)
+  const titleRow = ws.addRow([`입고내역 검증 요약 — ${summary.range} ${summary.vendor}`]);
+  ws.mergeCells(titleRow.number, 1, titleRow.number, 11);
+  titleRow.height = 22;
+  titleRow.eachCell({ includeEmpty: true }, c => { fillCell(c, COLOR.navy); c.font = { bold: true, size: 13, color: { argb: 'FFFFFFFF' } }; c.alignment = { vertical: 'middle', indent: 1 }; });
   ws.addRow([]);
 
-  const bold = (row) => { row.font = { bold: true }; };
-  bold(ws.addRow(['총계 대사', null, null, null, '예외 상세 (직렬 — 한 줄에 한 건)']));
-  ws.addRow(['재고수불 실입고수량 합계 (수불시트)', summary.scmTotal, null, null,
-    '유형', '날짜', '품목코드', '상품명', '수불시트수량', 'WMS수량', '차이', '거래처명']).font = { bold: false };
-  ws.getRow(4).getCell(5).font = { bold: true };
-  ws.getRow(4).getCell(6).font = { bold: true };
-  ws.addRow(['WMS 총입고수량 (매출반품 제외)', summary.wmsTotalExRet]);
-  ws.addRow(['차이 (수불시트 − WMS)', summary.diffTotal]);
+  const sectionHeader = (label, colFrom, colTo) => {
+    const row = ws.addRow([]);
+    if (colFrom === 1) row.getCell(1).value = label; else row.getCell(colFrom).value = label;
+    ws.mergeCells(row.number, colFrom, row.number, colTo);
+    for (let c = colFrom; c <= colTo; c++) { fillCell(row.getCell(c), COLOR.midBlue); row.getCell(c).font = { bold: true }; }
+    return row.number;
+  };
+  const numRow = (label, value, opts) => {
+    const row = ws.addRow([label, value]);
+    fillCell(row.getCell(1), COLOR.lightBlue); fillCell(row.getCell(2), COLOR.lightBlue);
+    row.getCell(2).numFmt = NUMFMT;
+    row.getCell(2).alignment = { horizontal: 'right' };
+    if (opts?.bold) { row.getCell(1).font = { bold: true }; row.getCell(2).font = { bold: true }; }
+    if (opts?.colorBySign) { const col = signColor(value); if (col) row.getCell(2).font = { ...(row.getCell(2).font || {}), color: { argb: col } }; }
+    return row;
+  };
+
+  const headerRow = ws.addRow([]);
+  headerRow.getCell(1).value = '총계 대사';
+  ws.mergeCells(headerRow.number, 1, headerRow.number, 2);
+  headerRow.getCell(5).value = '예외 상세 (직렬 — 한 줄에 한 건)';
+  ws.mergeCells(headerRow.number, 5, headerRow.number, 11);
+  [1, 2, 5, 6, 7, 8, 9, 10, 11].forEach(c => { fillCell(headerRow.getCell(c), COLOR.midBlue); headerRow.getCell(c).font = { bold: true }; });
+  const detailAnchorRow = headerRow.number;
+  numRow('재고수불 실입고수량 합계 (수불시트)', summary.scmTotal);
+  numRow('WMS 총입고수량 (매출반품 제외)', summary.wmsTotalExRet);
+  numRow('차이 (수불시트 − WMS)', summary.diffTotal, { bold: true, colorBySign: true });
   ws.addRow([]);
-  bold(ws.addRow(['차이 분해 (예외 유형별)']));
-  ws.addRow(['└ 냉동/상온 수불시트 미기재 (실입고수량 공란)', summary.details.blankScm.length]);
-  ws.addRow(['└ WMS 비계획입고 (재고수불 시트 미기재)', summary.details.unplanned.length]);
-  ws.addRow(['└ 미입고', summary.details.notReceived.length]);
-  ws.addRow(['└ 수불시트_WMS 수량불일치', summary.details.mismatch.length]);
-  ws.addRow(['미확정 (대기중, 실입고 0건 — 총계엔 영향 없음, 참고용)', summary.details.pending.length]);
-  ws.addRow(['매출반품 (제외 대상, 참고)', summary.retTotal]);
+  sectionHeader('차이 분해 (예외 유형별)', 1, 2);
+
+  const mismatchAmt = summary.details.mismatch.reduce((a, r) => a + r.차이, 0);
+  const notReceivedAmt = summary.details.notReceived.reduce((a, r) => a + r.재고수불수량, 0);
+  const unplannedAmt = -summary.details.unplanned.reduce((a, r) => a + r.WMS수량, 0);
+  const blankScmAmt = -summary.details.blankScm.reduce((a, r) => a + r.WMS수량, 0);
+  const countNote = (n) => `${n}건 — 상세는 우측 표 참조`;
+
+  const breakdownRow = (label, amount, count) => {
+    const row = numRow(label, amount, { colorBySign: true });
+    row.getCell(3).value = countNote(count);
+    row.getCell(3).font = { italic: true, color: { argb: 'FF666666' } };
+    return row;
+  };
+  breakdownRow('└ 냉동/상온 수불시트 미기재 (실입고수량 공란)', blankScmAmt, summary.details.blankScm.length);
+  breakdownRow('└ WMS 비계획입고 (재고수불 시트 미기재)', unplannedAmt, summary.details.unplanned.length);
+  breakdownRow('└ 미입고', notReceivedAmt, summary.details.notReceived.length);
+  breakdownRow('└ 수불시트_WMS 수량불일치', mismatchAmt, summary.details.mismatch.length);
+  const pendingRow = numRow('미확정 (대기중, 실입고 0건 — 총계엔 영향 없음, 참고용)', summary.details.pending.length);
+  pendingRow.getCell(3).value = countNote(summary.details.pending.length);
+  pendingRow.getCell(3).font = { italic: true, color: { argb: 'FF666666' } };
+  numRow('매출반품 (제외 대상, 참고)', summary.retTotal);
   ws.addRow([]);
-  bold(ws.addRow(['검증 결과']));
-  ws.addRow(['잔여 미설명 차이 (0이어야 정상)', summary.residual]);
+  sectionHeader('검증 결과', 1, 2);
+  numRow('잔여 미설명 차이 (0이어야 정상)', summary.residual, { bold: true, colorBySign: true });
   const abnormalCount = summary.details.mismatch.length + summary.details.notReceived.length +
     summary.details.unplanned.length + summary.details.blankScm.length;
-  ws.addRow(['불일치 건수 (품목코드+날짜 기준)', abnormalCount]);
-  ws.addRow(['완전일치 그룹 수', summary.counts.complete]);
-  ws.addRow(['전체 대사 그룹 수 (품목코드+날짜)', summary.counts.totalGroups]);
+  numRow('불일치 건수 (품목코드+날짜 기준)', abnormalCount);
+  numRow('완전일치 그룹 수', summary.counts.complete);
+  numRow('전체 대사 그룹 수 (품목코드+날짜)', summary.counts.totalGroups);
 
-  // 예외 상세 — 4종류를 한 표로 직렬 나열 (컬럼 E부터)
-  let r = 4;
-  const put = (row, type, d) => {
-    ws.getRow(row).getCell(5).value = type;
-    ws.getRow(row).getCell(6).value = d.날짜 ?? '';
-    ws.getRow(row).getCell(7).value = d.품목코드 ?? '';
-    ws.getRow(row).getCell(8).value = d.상품명 ?? '';
-    ws.getRow(row).getCell(9).value = d.재고수불수량 ?? (d.수불시트수량 ?? '');
-    ws.getRow(row).getCell(10).value = d.WMS수량 ?? '';
-    ws.getRow(row).getCell(11).value = d.차이 ?? '';
-    ws.getRow(row).getCell(12).value = d.거래처명 ?? '';
+  // 예외 상세 — 유형별로 따로 표를 이어붙임 (컬럼 E부터), 건이 없는 유형은 표 자체를 생략.
+  let r = detailAnchorRow; // '총계 대사'/'예외 상세' 헤더가 있던 행 다음부터
+  const DETAIL_COLS = ['날짜', '품목코드', '상품명', 'WMS수량', '수불시트수량', '차이', '비고'];
+  const writeDetailTable = (label, rows, mapRow) => {
+    if (!rows.length) return;
+    r++;
+    const hRow = ws.getRow(r);
+    hRow.getCell(5).value = label;
+    ws.mergeCells(r, 5, r, 11);
+    hRow.getCell(5).font = { bold: true, color: { argb: COLOR.bad } };
+    r++;
+    const colRow = ws.getRow(r);
+    DETAIL_COLS.forEach((c, i) => { colRow.getCell(5 + i).value = c; fillCell(colRow.getCell(5 + i), COLOR.gray); colRow.getCell(5 + i).font = { bold: true }; });
+    rows.forEach(d => {
+      r++;
+      const vals = mapRow(d);
+      DETAIL_COLS.forEach((c, i) => {
+        const cell = ws.getRow(r).getCell(5 + i);
+        cell.value = vals[i] ?? '';
+        if (typeof vals[i] === 'number') { cell.numFmt = NUMFMT; cell.alignment = { horizontal: 'right' }; }
+      });
+      const diffCell = ws.getRow(r).getCell(10);
+      const col = signColor(vals[5]);
+      if (col) diffCell.font = { color: { argb: col }, bold: true };
+    });
+    r++; // 표 사이 빈 줄
   };
-  summary.details.mismatch.forEach(d => { r++; put(r, '수량불일치', d); });
-  summary.details.notReceived.forEach(d => { r++; put(r, '미입고', d); });
-  summary.details.unplanned.forEach(d => { r++; put(r, 'WMS비계획입고', d); });
-  summary.details.blankScm.forEach(d => { r++; put(r, '수불시트미기재(공란)', { ...d, 재고수불수량: '(공란)' }); });
+
+  writeDetailTable('① 수불시트_WMS 수량불일치', summary.details.mismatch,
+    d => [d.날짜, d.품목코드, d.상품명, d.WMS수량, d.재고수불수량, d.차이, '']);
+  writeDetailTable('② 미입고', summary.details.notReceived,
+    d => [d.날짜, d.품목코드, d.상품명, 0, d.재고수불수량, d.재고수불수량, '']);
+  writeDetailTable('③ WMS 비계획입고 (재고수불 시트 미기재)', summary.details.unplanned,
+    d => [d.날짜, d.품목코드, d.상품명, d.WMS수량, 0, -d.WMS수량, d.거래처명]);
+  writeDetailTable('④ 냉동/상온 수불시트 미기재 (실입고수량 공란)', summary.details.blankScm,
+    d => [d.날짜, d.품목코드, d.상품명, d.WMS수량, 0, -d.WMS수량, '수불시트 미기재']);
 }
 
 function buildSublSheet(wb, sublRows, summary) {
@@ -334,8 +404,12 @@ function buildSublSheet(wb, sublRows, summary) {
   ];
   ws.addRow(header).font = { bold: true };
   ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFD9D9D9' } };
-  sublRows.forEach(r => ws.addRow(r.raw));
+  // CSV export는 "4,320"처럼 천단위 콤마가 든 숫자를 문자열 그대로 내려준다 — 엑셀에서
+  // 진짜 숫자로 다뤄지도록 콤마 있는 순수 숫자 형태만 골라 변환.
+  const toNum = (v) => (/^-?[\d,]+(\.\d+)?$/.test(v) ? Number(v.replace(/,/g, '')) : v);
+  sublRows.forEach(r => ws.addRow(r.raw.map(toNum)));
   ws.getColumn(11).width = 40;
+  ws.getColumn(21).numFmt = NUMFMT;
 
   // 오른쪽 피벗: 품목코드별 수불시트 행수 + (참고용) 수불시트 실입고 합계
   const pivotCol = header.length + 2; // 빈 열 하나 띄우고
@@ -378,6 +452,8 @@ function buildWmsSheet(wb, wmsRows) {
     r.입고EA, r.소비기한, r.LOT, r.입고일자로트, r.단가, r.품목대분류, r.품목중분류, r.비고, r.입고수량,
   ]));
   ws.getColumn(11).width = 40;
+  ws.getColumn(15).numFmt = NUMFMT;
+  ws.getColumn(26).numFmt = NUMFMT;
   ws.views = [{ state: 'frozen', ySplit: 1 }];
 }
 
