@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { highlightLastCells } from "@/lib/chart-highlight";
 import { TABLE_LABEL_COL_WIDTH } from "@/lib/chart-layout";
 
 interface SavingsByManufacturerChartProps {
@@ -63,8 +64,9 @@ export function SavingsByManufacturerChart({
             fill={manufacturerColor[m]}
             radius={i === manufacturers.length - 1 ? [4, 4, 0, 0] : undefined}
             maxBarSize={24}
-            isAnimationActive={false}
-          />
+            isAnimationActive={false}>
+          {highlightLastCells(data.length, manufacturerColor[m])}
+        </Bar>
         ))}
       </BarChart>
     </ResponsiveContainer>

@@ -12,6 +12,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { highlightLastCells } from "@/lib/chart-highlight";
 import { TABLE_LABEL_COL_WIDTH, RIGHT_AXIS_WIDTH } from "@/lib/chart-layout";
 
 interface SavingsRatioChartProps {
@@ -68,7 +69,9 @@ export function SavingsRatioChart({ months, ratios, savingsTotals, targets }: Sa
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Bar yAxisId="savings" dataKey="savings" name="절감액" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
+        <Bar yAxisId="savings" dataKey="savings" name="절감액" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false}>
+          {highlightLastCells(data.length, "var(--chart-1)")}
+        </Bar>
         {/* isAnimationActive=false: react-smooth never resolves under React 19,
             leaving the path stuck at its hidden (stroke-dashoffset) starting state */}
         <Line

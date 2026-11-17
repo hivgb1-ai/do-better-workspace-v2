@@ -17,11 +17,11 @@ export function KpiCard({ label, value, delta }: KpiCardProps) {
         <p className="text-xs text-muted-foreground">{label}</p>
       </CardHeader>
       <CardContent className="px-4">
-        <p className="text-2xl font-semibold tabular-nums">{value}</p>
+        <p className={cn("text-2xl font-semibold tabular-nums", /^[\d.,%+-]/.test(value) && "font-mono tracking-tight")}>{value}</p>
         {delta && (
           <span
             className={cn(
-              "mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs",
+              "mt-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold",
               delta.tone === "good" && "bg-good-bg text-good",
               delta.tone === "critical" && "bg-critical-bg text-critical",
               delta.tone === "neutral" && "bg-muted text-muted-foreground"

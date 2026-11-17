@@ -10,6 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { highlightLastCells } from "@/lib/chart-highlight";
 import { TABLE_LABEL_COL_WIDTH } from "@/lib/chart-layout";
 
 interface CostCompositionChartProps {
@@ -58,8 +59,12 @@ export function CostCompositionChart({ months, directCosts, milkrunCosts }: Cost
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Bar dataKey="direct" name="직납" stackId="cost" fill="var(--chart-1)" maxBarSize={24} isAnimationActive={false} />
-        <Bar dataKey="milkrun" name="밀크런&쉽먼트" stackId="cost" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
+        <Bar dataKey="direct" name="직납" stackId="cost" fill="var(--chart-1)" maxBarSize={24} isAnimationActive={false}>
+          {highlightLastCells(data.length, "var(--chart-1)")}
+        </Bar>
+        <Bar dataKey="milkrun" name="밀크런&쉽먼트" stackId="cost" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false}>
+          {highlightLastCells(data.length, "var(--chart-3)")}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   );

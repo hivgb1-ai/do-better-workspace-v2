@@ -38,12 +38,13 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="min-h-full flex flex-col bg-muted/30">
+      <body className="min-h-full flex flex-col bg-background">
         <SiteNav />
         <main className="mx-auto w-full max-w-screen-2xl flex-1 px-6 py-6">{children}</main>
       </body>
