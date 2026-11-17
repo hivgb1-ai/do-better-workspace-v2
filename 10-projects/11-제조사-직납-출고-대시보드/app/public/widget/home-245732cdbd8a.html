@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>영학 개인 홈</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Outfit:wght@200;300;400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{--b:#fafaf8;--k:#151515;--g:#80807c;--l:#151515;--ui:"Noto Sans KR",-apple-system,"Segoe UI",sans-serif;--num:"Outfit","Noto Sans KR",sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--b);color:var(--k);font-family:var(--ui)}
+.pg{border:1px solid var(--l)}
+.head{background:#151515;color:#fafaf8;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:14px 20px}
+.head h1{margin:0;font-size:16px;font-weight:700;letter-spacing:.02em}
+.head span{font-family:var(--mono);font-size:12px;opacity:.75}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.c{border-right:1px solid var(--l);border-bottom:1px solid var(--l);padding:14px 16px 16px;min-width:0;display:flex;flex-direction:column;gap:6px}
+.grid>.c:nth-child(4n),.grid>.span2:nth-child(even),.span4{border-right:0}
+.span2{grid-column:span 2}.span4{grid-column:span 4}
+.lab{font-family:var(--mono);font-size:14px;font-weight:600;letter-spacing:.01em}
+.v{font-family:var(--num);font-weight:200;font-size:40px;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.s{font-family:var(--mono);font-size:11.5px;color:var(--g)}
+a.wc{color:inherit;text-decoration:none}a.wc:hover{background:#f0f0ec}
+.nx{font-size:14px;font-weight:700;margin-top:4px}
+ul{list-style:none;margin:0;padding:0}
+.ag li{display:grid;grid-template-columns:76px minmax(0,1fr) 56px;gap:10px;padding:8px 0;border-bottom:1px dashed #c9c9c5;font-size:13.5px;align-items:baseline}
+.ag li:last-child{border-bottom:0}
+.ag .d,.ag .tm{font-family:var(--mono);font-size:12px}
+.ag .tm{text-align:right;color:var(--g)}
+.ag .past{opacity:.38}
+.ag .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dd{font-family:var(--num);font-size:11px;border:1px solid var(--k);border-radius:999px;padding:0 6px;margin-left:6px}
+.mini table{width:100%;border-collapse:collapse;table-layout:fixed;font-family:var(--num);font-size:13px;text-align:center}
+.mini th{color:var(--g);font-weight:400;padding:2px 0 8px;font-size:11px;letter-spacing:.12em;font-family:var(--mono)}
+.mini td{padding:6px 0;position:relative}
+.mini .o{opacity:.22}
+.mini .t b{background:var(--k);color:var(--b);border-radius:999px;display:inline-block;width:26px;padding:2px 0}
+.mini b{font-weight:400}
+.mini td i{position:absolute;left:50%;bottom:0;width:4px;height:4px;border-radius:50%;background:var(--k);transform:translateX(-50%)}
+.mini .sun{color:#c0392b}
+.pfh{padding:12px 16px;border-bottom:1px solid var(--l)}
+.pf{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+.pf>div,.pf>a{border-right:1px solid var(--l);border-bottom:1px solid var(--l);padding:14px 16px 18px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.pf>*:nth-child(3n){border-right:0}
+.pf>*:nth-last-child(-n+3){border-bottom:0}
+.pf .bx{height:46px;background:repeating-linear-gradient(45deg,#151515 0 1px,transparent 1px 7px);opacity:.18;margin-bottom:6px}
+.pf .no{font-family:var(--mono);font-size:11px;color:var(--g);display:flex;justify-content:space-between}
+.pf b{font-size:15px}
+.pf p{margin:0;font-size:12.5px;color:var(--g);line-height:1.5}
+.perf{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0;border-top:1px solid var(--l);border-left:1px solid var(--l);margin-top:4px}
+.perf a,.perf span{border-right:1px solid var(--l);border-bottom:1px solid var(--l);padding:10px 0;text-align:center;font-family:var(--num);font-size:15px;color:var(--k);text-decoration:none}
+.perf a:hover{background:#151515;color:#fafaf8}
+.perf span{color:#c9c9c5}
+a.card{color:inherit;text-decoration:none;transition:background .15s}
+a.card:hover{background:#f0f0ec}
+.go{font-family:var(--mono);font-size:10.5px;border:1px solid var(--k);padding:0 6px;margin-left:6px}
+.go.off{border-color:#c9c9c5;color:var(--g)}
+.upd{font-family:var(--mono);font-size:10.5px;color:var(--g);padding:8px 16px;border-top:1px solid var(--l);text-align:right}
+@media (max-width:720px){
+  .perf{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .span2,.span4{grid-column:span 2}
+  .grid>.c{border-right:1px solid var(--l)}.grid>.c:nth-child(2n){border-right:0}.span2,.span4{border-right:0!important}
+  .pf{grid-template-columns:1fr}.pf>div,.pf>a{border-right:0!important;border-bottom:1px solid var(--l)!important}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+  <div class="head"><h1>📦 김영학 / LOGISTICS OPERATIONS</h1><span id="hd"></span></div>
+  <div class="grid">
+    <div class="c"><div class="lab">⏰ time</div><div class="v" id="clk">--:--</div><div class="s" id="sec">KST</div></div>
+    <a class="c wc" href="https://search.naver.com/search.naver?query=%EC%84%B1%EB%8F%99%EA%B5%AC+%EB%82%A0%EC%94%A8" target="_blank" rel="noopener"><div class="lab" id="wl">🌤️ weather · 성동구</div><div class="v" id="wt">–</div><div class="s" id="ws">날씨 불러오는 중…</div></a>
+    <div class="c"><div class="lab">💼 since 2024.08.28</div><div class="v" id="dp">–</div><div class="s" id="ds"></div></div>
+    <div class="c"><div class="lab">📌 next</div><div class="nx" id="nx">–</div><div class="s" id="nxs"></div></div>
+    <div class="c span2"><div class="lab">🗓️ schedule · google calendar</div><ul class="ag" id="ag"></ul></div>
+    <div class="c span2"><div class="lab" id="mt">📅</div><div class="mini" id="mini"></div></div>
+    <div class="c span4"><div class="lab">📌 월별 성과내역 <span class="s" style="font-weight:400">· 누르면 해당 월 노션 페이지</span></div><div class="perf" id="perf"></div></div>
+    <div class="c span4" style="padding:0;border-bottom:0"><div class="lab pfh">🗂️ portfolio — 6 items</div><div class="pf" id="pf"></div></div>
+  </div>
+  <div class="upd" id="upd"></div>
+</div>
+<script>
+// 구글 캘린더 일정 (가져온 날: 2026-11-17)
+const SYNCED="2026-11-17";
+const EV=[["2026-11-02","12:30","점심"],["2026-11-10","14:00","[9-1] 커뮤니티 개설 안내"],["2026-11-19","18:00","SCM본부 회식"],["2026-11-20","종일","패밀리데이"],["2026-11-25","15:00","11월 타운홀미팅 · 6층 캔틴"],["2026-11-26","종일","커뮤니티 데이"],["2026-12-31","종일","패밀리데이"]];
+// [이모지, 이름, 설명, 분류, 시기, 링크, 링크 종류] — LOCAL = 내 PC에서 도구 서버가 켜져 있을 때만 열림
+const WORK=[["🧾","쿠팡 발주서 자동화","발주 다운로드부터 양식 생성까지 한 번에","자동화","2026.07","http://127.0.0.1:8935/","LOCAL"],["📊","직납 출고 대시보드","시트 연동 출고·절감비율 실시간 조회","대시보드","2026.07","https://app-phi-two-42.vercel.app/","WEB"],["💰","비용절감 리포트","밀크런·쉽먼트 원본 자동 수집 → 보고서","리포트","2026.11","","PC 실행"],["🧭","센터 취합","흩어진 로켓 발주를 최소 센터로 모아 변경 요청","자동화","2026.11","http://127.0.0.1:8935/","LOCAL"],["✉️","마감내역서 발송","거래처 13곳 내역서 생성·메일 발송","정산","2026.10","http://127.0.0.1:8941/closing","LOCAL"],["🚚","밀크런 대량 접수","물류사 엑셀로 쿠팡 밀크런 일괄 접수","자동화","2026.10","http://127.0.0.1:8935/","LOCAL"]];
+// 노션 월별 성과내역 (가져온 날: 2026-11-17)
+const PERF={1:"36008b93608a80da91dbe99ff6dad98f",2:"36008b93608a80eaaa19cf3ae23e803f",3:"36008b93608a80c39f4fd95be13fa1ae",4:"36008b93608a80019cfaea074dba0817",5:"36008b93608a8002b995dc54dd43a2c4",6:"38f08b93608a80b9a990f7dfba1515e0"};
+const pad=n=>String(n).padStart(2,"0"),W="일월화수목금토",WE=["SUN","MON","TUE","WED","THU","FRI","SAT"];
+function kst(){const n=new Date();return new Date(n.getTime()+(n.getTimezoneOffset()+540)*60000)}
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+function left(s){const t=kst(),a=Date.UTC(t.getFullYear(),t.getMonth(),t.getDate()),[y,m,d]=s.split("-").map(Number);return Math.round((Date.UTC(y,m-1,d)-a)/86400000)}
+const wd=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d).getDay()};
+
+function tick(){
+  const d=kst();
+  document.getElementById("clk").textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  document.getElementById("sec").textContent=`KST · ${pad(d.getSeconds())}s`;
+  document.getElementById("hd").textContent=`${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${W[d.getDay()]}요일`;
+  const n=Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(2024,7,28))/86400000)+1;
+  document.getElementById("dp").textContent=`D+${n}`;
+  let y=d.getFullYear()-2024,m=d.getMonth()-7;if(d.getDate()<28)m--;if(m<0){y--;m+=12}
+  document.getElementById("ds").textContent=`days · ${y}년 ${m}개월째`;
+}
+function schedule(){
+  const t=kst(),cur=`${t.getFullYear()}-${pad(t.getMonth()+1)}`;
+  // 이번 달 지난 일정 + 앞으로의 일정 (최대 8개)
+  const list=EV.filter(e=>e[0].startsWith(cur)||left(e[0])>=0).slice(-8);
+  document.getElementById("ag").innerHTML=list.map(([dt,tm,s])=>{const n=left(dt);
+    return `<li class="${n<0?"past":""}"><span class="d">${dt.slice(5).replace("-",".")} ${W[wd(dt)]}</span><span class="t">${s}${n>=0&&n<=10?`<span class="dd">${n?"D-"+n:"TODAY"}</span>`:""}</span><span class="tm">${tm}</span></li>`}).join("")||'<li><span></span><span class="s">예정된 일정이 없어요</span><span></span></li>';
+  const nx=EV.find(e=>left(e[0])>=0);
+  document.getElementById("nx").textContent=nx?nx[2]:"예정 없음";
+  document.getElementById("nxs").textContent=nx?`${nx[0].slice(5).replace("-",".")} ${nx[1]} · ${left(nx[0])?"D-"+left(nx[0]):"TODAY"}`:"";
+}
+function mini(){
+  const t=kst(),y=t.getFullYear(),m=t.getMonth(),first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate(),prev=new Date(y,m,0).getDate();
+  const has=new Set(EV.filter(e=>e[0].startsWith(`${y}-${pad(m+1)}`)).map(e=>+e[0].slice(8)));
+  let c=[],i;for(i=0;i<first;i++)c.push([prev-first+1+i,"o"]);for(i=1;i<=last;i++)c.push([i,i===t.getDate()?"t":""]);let k=1;while(c.length%7)c.push([k++,"o"]);
+  let r="";for(let j=0;j<c.length;j+=7)r+="<tr>"+c.slice(j,j+7).map(([n,cl],x)=>`<td class="${cl} ${x===0&&cl!=="o"?"sun":""}"><b>${n}</b>${cl!=="o"&&has.has(n)?"<i></i>":""}</td>`).join("")+"</tr>";
+  document.getElementById("mt").textContent=`📅 ${y}.${pad(m+1)}`;
+  document.getElementById("mini").innerHTML=`<table><thead><tr>${"SMTWTFS".split("").map(x=>`<th>${x}</th>`).join("")}</tr></thead><tbody>${r}</tbody></table>`;
+}
+document.getElementById("pf").innerHTML=WORK.map((w,i)=>{const inner=`<div class="bx"></div><div class="no"><span>NO.${pad(i+1)}</span><span>${w[4]}</span></div><b>${w[0]} ${w[1]}</b><p>${w[2]}</p><div class="s">#${w[3]}<span class="go ${w[5]?"":"off"}">${w[5]?"↗ ":""}${w[6]}</span></div>`;
+  return w[5]?`<a class="card" href="${w[5]}" target="_blank" rel="noopener">${inner}</a>`:`<div>${inner}</div>`}).join("");
+document.getElementById("perf").innerHTML=Array.from({length:12},(_,i)=>{const m=i+1;return PERF[m]?`<a href="https://www.notion.so/${PERF[m]}" target="_blank" rel="noopener">${m}월</a>`:`<span>${m}월</span>`}).join("");
+document.getElementById("upd").textContent=`일정 기준 ${SYNCED.replaceAll("-",".")} · 구글 캘린더`;
+
+const WX={0:["맑음","☀️"],1:["대체로 맑음","🌤️"],2:["구름 조금","⛅"],3:["흐림","☁️"],45:["안개","🌫️"],48:["안개","🌫️"],51:["이슬비","🌦️"],53:["이슬비","🌦️"],55:["이슬비","🌦️"],61:["비","🌧️"],63:["비","🌧️"],65:["강한 비","🌧️"],66:["어는 비","🌧️"],67:["어는 비","🌧️"],71:["눈","🌨️"],73:["눈","🌨️"],75:["많은 눈","❄️"],77:["싸락눈","🌨️"],80:["소나기","🌦️"],81:["소나기","🌦️"],82:["강한 소나기","⛈️"],85:["눈 소나기","🌨️"],86:["눈 소나기","🌨️"],95:["뇌우","⛈️"],96:["뇌우","⛈️"],99:["뇌우","⛈️"]};
+async function weather(){
+  try{
+    const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=37.5634&longitude=127.0369&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FSeoul&forecast_days=1");
+    if(!r.ok) throw new Error(r.status);
+    const j=await r.json(),c=j.current,w=WX[c.weather_code]||["",""];
+    document.getElementById("wl").textContent=`${w[1]||"🌤️"} weather · 성동구`;
+    document.getElementById("wt").textContent=`${Math.round(c.temperature_2m)}°`;
+    document.getElementById("ws").textContent=`${w[0]} · ${Math.round(j.daily.temperature_2m_max[0])}° / ${Math.round(j.daily.temperature_2m_min[0])}°`;
+  }catch(e){document.getElementById("ws").textContent="날씨를 불러오지 못했어요 · 눌러서 보기"}
+}
+let lastDay="";
+function all(){tick();const d=ymd(kst());if(d!==lastDay){lastDay=d;schedule();mini()}}
+all();setInterval(all,1000);weather();setInterval(weather,15*60*1000);
+</script>
+</body>
+</html>
