@@ -12,7 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { highlightLastCells } from "@/lib/chart-highlight";
 import { TABLE_LABEL_COL_WIDTH, RIGHT_AXIS_WIDTH } from "@/lib/chart-layout";
 
 interface MilkrunChannelChartProps {
@@ -68,12 +67,8 @@ export function MilkrunChannelChart({ months, revenue, milkrunCost, ratio }: Mil
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Bar yAxisId="amount" dataKey="revenue" name="총매출" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false}>
-          {highlightLastCells(data.length, "var(--chart-1)")}
-        </Bar>
-        <Bar yAxisId="amount" dataKey="milkrunCost" name="밀크런" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false}>
-          {highlightLastCells(data.length, "var(--chart-3)")}
-        </Bar>
+        <Bar yAxisId="amount" dataKey="revenue" name="총매출" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
+        <Bar yAxisId="amount" dataKey="milkrunCost" name="밀크런" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
         <Line
           yAxisId="ratio"
           type="monotone"

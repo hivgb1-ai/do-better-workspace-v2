@@ -10,7 +10,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { highlightLastCells } from "@/lib/chart-highlight";
 
 interface MonthlyShipmentChartProps {
   manufacturers: string[];
@@ -56,9 +55,7 @@ export function MonthlyShipmentChart({
             fill={manufacturerColor[m]}
             radius={[4, 4, 0, 0]}
             maxBarSize={24}
-            isAnimationActive={false}>
-          {highlightLastCells(data.length, manufacturerColor[m])}
-        </Bar>
+            isAnimationActive={false} />
         ))}
       </BarChart>
     </ResponsiveContainer>

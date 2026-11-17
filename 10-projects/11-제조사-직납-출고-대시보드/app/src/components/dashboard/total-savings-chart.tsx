@@ -1,7 +1,6 @@
 "use client";
 
 import { Bar, CartesianGrid, ComposedChart, LabelList, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { highlightLastCells } from "@/lib/chart-highlight";
 import { TABLE_LABEL_COL_WIDTH } from "@/lib/chart-layout";
 
 interface TotalSavingsChartProps {
@@ -41,12 +40,8 @@ export function TotalSavingsChart({ months, directSavings, milkrunSavings }: Tot
           }}
         />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Bar dataKey="direct" name="직납 절감액" stackId="total" fill="var(--chart-1)" maxBarSize={24} isAnimationActive={false}>
-          {highlightLastCells(data.length, "var(--chart-1)")}
-        </Bar>
-        <Bar dataKey="milkrun" name="밀크런 절감액" stackId="total" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false}>
-          {highlightLastCells(data.length, "var(--chart-3)")}
-        </Bar>
+        <Bar dataKey="direct" name="직납 절감액" stackId="total" fill="var(--chart-1)" maxBarSize={24} isAnimationActive={false} />
+        <Bar dataKey="milkrun" name="밀크런 절감액" stackId="total" fill="var(--chart-3)" radius={[4, 4, 0, 0]} maxBarSize={24} isAnimationActive={false} />
         {/* 합계(TTL) 라벨 전용 — 밀크런 절감액이 0인 달은 그 막대 구간 자체가 그려지지 않아 거기 얹은
             LabelList도 함께 사라진다(recharts 특성). 값이 0이 될 일이 없는 totalLabel을 보이지 않는
             선에 실어서, 스택 맨 위 위치에 항상 라벨이 뜨도록 함. */}
